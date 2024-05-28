@@ -1,0 +1,27 @@
+name = "kycworker"
+compatibility_date = "2023-12-01"
+workers_dev = true
+
+[vars]
+ARGOS_API_KEY = "${ARGOS_API_KEY}"
+RPC_URL = "${RPC_URL}"
+AUTH_API_KEY = "${AUTH_API_KEY}"
+FRONT_API_KEY = "${FRONT_API_KEY}"
+
+# [[kv_namespaces]]
+# binding = "MY_KV_NAMESPACE"
+# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# [[r2_buckets]]
+# binding = "MY_BUCKET"
+# bucket_name = "my-bucket"
+
+[[d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "worker-db"
+database_id = "ffa85d52-a38c-4cff-a876-1a7a8c13fe88"
+
+# [ai]
+# binding = "AI"
+
+

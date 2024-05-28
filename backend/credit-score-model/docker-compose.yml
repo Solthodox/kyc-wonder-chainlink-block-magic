@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  ml-model-service:
+    restart: always
+    build:
+      context: .
+    volumes:
+      - .:/code
+    ports:
+      - "8080:8080"

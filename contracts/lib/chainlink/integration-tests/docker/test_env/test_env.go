@@ -1,0 +1,331 @@
+package test_env
+
+import (
+	"encoding/json"
+	"fmt"
+	"math/big"
+	"testing"
+
+	"github.com/ethereum/go-ethereum/accounts/keystore"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/smartcontractkit/seth"
+	tc "github.com/testcontainers/testcontainers-go"
+
+	"github.com/smartcontractkit/chainlink-testing-framework/blockchain"
+	"github.com/smartcontractkit/chainlink-testing-framework/docker"
+	"github.com/smartcontractkit/chainlink-testing-framework/docker/test_env"
+	"github.com/smartcontractkit/chainlink-testing-framework/logging"
+	"github.com/smartcontractkit/chainlink-testing-framework/logstream"
+	"github.com/smartcontractkit/chainlink-testing-framework/utils/runid"
+	"github.com/smartcontractkit/chainlink/v2/core/services/chainlink"
+
+	actions_seth "github.com/smartcontractkit/chainlink/integration-tests/actions/seth"
+	"github.com/smartcontractkit/chainlink/integration-tests/client"
+	"github.com/smartcontractkit/chainlink/integration-tests/contracts"
+	core_testconfig "github.com/smartcontractkit/chainlink/integration-tests/testconfig"
+)
+
+var (
+	ErrFundCLNode = "failed to fund CL node"
+)
+
+type CLClusterTestEnv struct {
+	Cfg           *TestEnvConfig
+	DockerNetwork *tc.DockerNetwork
+	LogStream     *logstream.LogStream
+
+	/* components */
+	ClCluster              *ClCluster
+	MockAdapter            *test_env.Killgrave
+	evmClients             map[int64]blockchain.EVMClient
+	sethClients            map[int64]*seth.Client
+	ContractDeployer       contracts.ContractDeployer
+	ContractLoader         contracts.ContractLoader
+	PrivateEthereumConfigs []*test_env.EthereumNetwork // new approach to private chains, supporting eth1 and eth2
+	EVMNetworks            []*blockchain.EVMNetwork
+	rpcProviders           map[int64]*test_env.RpcProvider
+	l                      zerolog.Logger
+	t                      *testing.T
+	isSimulatedNetwork     bool
+}
+
+func NewTestEnv() (*CLClusterTestEnv, error) {
+	log.Logger = logging.GetLogger(nil, "CORE_DOCKER_ENV_LOG_LEVEL")
+	network, err := docker.CreateNetwork(log.Logger)
+	if err != nil {
+		return nil, err
+	}
+	return &CLClusterTestEnv{
+		DockerNetwork: network,
+		l:             log.Logger,
+	}, nil
+}
+
+// WithTestEnvConfig sets the test environment cfg.
+// Sets up private ethereum chain and MockAdapter containers with the provided cfg.
+func (te *CLClusterTestEnv) WithTestEnvConfig(cfg *TestEnvConfig) *CLClusterTestEnv {
+	te.Cfg = cfg
+	if cfg.MockAdapter.ContainerName != "" {
+		n := []string{te.DockerNetwork.Name}
+		te.MockAdapter = test_env.NewKillgrave(n, te.Cfg.MockAdapter.ImpostersPath, test_env.WithContainerName(te.Cfg.MockAdapter.ContainerName), test_env.WithLogStream(te.LogStream))
+	}
+	return te
+}
+
+func (te *CLClusterTestEnv) WithTestInstance(t *testing.T) *CLClusterTestEnv {
+	te.t = t
+	te.l = logging.GetTestLogger(t)
+	if te.MockAdapter != nil {
+		te.MockAdapter.WithTestInstance(t)
+	}
+	return te
+}
+
+func (te *CLClusterTestEnv) ParallelTransactions(enabled bool) {
+	for _, evmClient := range te.evmClients {
+		evmClient.ParallelTransactions(enabled)
+	}
+}
+
+func (te *CLClusterTestEnv) StartEthereumNetwork(cfg *test_env.EthereumNetwork) (blockchain.EVMNetwork, test_env.RpcProvider, error) {
+	// if environment is being restored from a previous state, use the existing config
+	// this might fail terribly if temporary folders with chain data on the host machine were removed
+	if te.Cfg != nil && te.Cfg.EthereumNetwork != nil {
+		builder := test_env.NewEthereumNetworkBuilder()
+		c, err := builder.WithExistingConfig(*te.Cfg.EthereumNetwork).
+			WithTest(te.t).
+			Build()
+		if err != nil {
+			return blockchain.EVMNetwork{}, test_env.RpcProvider{}, err
+		}
+		cfg = &c
+	}
+
+	te.l.Info().
+		Str("Execution Layer", string(*cfg.ExecutionLayer)).
+		Str("Ethereum Version", string(*cfg.EthereumVersion)).
+		Str("Custom Docker Images", fmt.Sprintf("%v", cfg.CustomDockerImages)).
+		Msg("Starting Ethereum network")
+
+	n, rpc, err := cfg.Start()
+
+	if err != nil {
+		return blockchain.EVMNetwork{}, test_env.RpcProvider{}, err
+	}
+
+	return n, rpc, nil
+}
+
+func (te *CLClusterTestEnv) StartMockAdapter() error {
+	return te.MockAdapter.StartContainer()
+}
+
+// pass config here
+func (te *CLClusterTestEnv) StartClCluster(nodeConfig *chainlink.Config, count int, secretsConfig string, testconfig core_testconfig.GlobalTestConfig, opts ...ClNodeOption) error {
+	if te.Cfg != nil && te.Cfg.ClCluster != nil {
+		te.ClCluster = te.Cfg.ClCluster
+	} else {
+		// prepend the postgres version option from the toml config
+		if testconfig.GetChainlinkImageConfig().PostgresVersion != nil && *testconfig.GetChainlinkImageConfig().PostgresVersion != "" {
+			opts = append([]func(c *ClNode){
+				func(c *ClNode) {
+					c.PostgresDb.EnvComponent.ContainerVersion = *testconfig.GetChainlinkImageConfig().PostgresVersion
+				},
+			}, opts...)
+		}
+		opts = append(opts, WithSecrets(secretsConfig), WithLogStream(te.LogStream))
+		te.ClCluster = &ClCluster{}
+		for i := 0; i < count; i++ {
+			ocrNode, err := NewClNode([]string{te.DockerNetwork.Name}, *testconfig.GetChainlinkImageConfig().Image, *testconfig.GetChainlinkImageConfig().Version, nodeConfig, opts...)
+			if err != nil {
+				return err
+			}
+			te.ClCluster.Nodes = append(te.ClCluster.Nodes, ocrNode)
+		}
+	}
+
+	// Set test logger
+	if te.t != nil {
+		for _, n := range te.ClCluster.Nodes {
+			n.SetTestLogger(te.t)
+		}
+	}
+
+	// Start/attach node containers
+	return te.ClCluster.Start()
+}
+
+// FundChainlinkNodes will fund all the provided Chainlink nodes with a set amount of native currency
+func (te *CLClusterTestEnv) FundChainlinkNodes(amount *big.Float) error {
+	if len(te.sethClients) == 0 && len(te.evmClients) == 0 {
+		return fmt.Errorf("both EVMClients and SethClient are nil, unable to fund chainlink nodes")
+	}
+
+	if len(te.sethClients) > 0 && len(te.evmClients) > 0 {
+		return fmt.Errorf("both EVMClients and SethClient are set, you can't use both at the same time")
+	}
+
+	if len(te.sethClients) > 0 {
+		for _, sethClient := range te.sethClients {
+			if err := actions_seth.FundChainlinkNodesFromRootAddress(te.l, sethClient, contracts.ChainlinkClientToChainlinkNodeWithKeysAndAddress(te.ClCluster.NodeAPIs()), amount); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(te.evmClients) > 0 {
+		for _, evmClient := range te.evmClients {
+			for _, cl := range te.ClCluster.Nodes {
+				if err := cl.Fund(evmClient, amount); err != nil {
+					return fmt.Errorf("%s, err: %w", ErrFundCLNode, err)
+				}
+			}
+			err := evmClient.WaitForEvents()
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (te *CLClusterTestEnv) Terminate() error {
+	// TESTCONTAINERS_RYUK_DISABLED=false by default so ryuk will remove all
+	// the containers and the Network
+	return nil
+}
+
+// Cleanup cleans the environment up after it's done being used, mainly for returning funds when on live networks and logs.
+func (te *CLClusterTestEnv) Cleanup() error {
+	te.l.Info().Msg("Cleaning up test environment")
+
+	runIdErr := runid.RemoveLocalRunId()
+	if runIdErr != nil {
+		te.l.Warn().Msgf("Failed to remove .run.id file due to: %s (not a big deal, you can still remove it manually)", runIdErr.Error())
+	}
+
+	if te.t == nil {
+		return fmt.Errorf("cannot cleanup test environment without a testing.T")
+	}
+
+	if te.ClCluster == nil || len(te.ClCluster.Nodes) == 0 {
+		return fmt.Errorf("chainlink nodes are nil, unable cleanup chainlink nodes")
+	}
+
+	te.logWhetherAllContainersAreRunning()
+
+	if len(te.evmClients) == 0 && len(te.sethClients) == 0 {
+		return fmt.Errorf("both EVMClients and SethClient are nil, unable to return funds from chainlink nodes during cleanup")
+	} else if te.isSimulatedNetwork {
+		te.l.Info().
+			Msg("Network is a simulated network. Skipping fund return.")
+	} else {
+		if err := te.returnFunds(); err != nil {
+			return err
+		}
+	}
+
+	// close EVMClient connections
+	for _, evmClient := range te.evmClients {
+		err := evmClient.Close()
+		return err
+	}
+
+	for _, sethClient := range te.sethClients {
+		sethClient.Client.Close()
+	}
+
+	return nil
+}
+
+func (te *CLClusterTestEnv) logWhetherAllContainersAreRunning() {
+	for _, node := range te.ClCluster.Nodes {
+		if node.Container == nil {
+			continue
+		}
+
+		isCLRunning := node.Container.IsRunning()
+		isDBRunning := node.PostgresDb.Container.IsRunning()
+
+		if !isCLRunning {
+			te.l.Warn().Str("Node", node.ContainerName).Msg("Chainlink node was not running, when test ended")
+		}
+
+		if !isDBRunning {
+			te.l.Warn().Str("Node", node.ContainerName).Msg("Postgres DB is not running, when test ended")
+		}
+	}
+}
+
+func (te *CLClusterTestEnv) returnFunds() error {
+	te.l.Info().Msg("Attempting to return Chainlink node funds to default network wallets")
+
+	if len(te.evmClients) == 0 && len(te.sethClients) == 0 {
+		return fmt.Errorf("both EVMClients and SethClient are nil, unable to return funds from chainlink nodes")
+	}
+
+	for _, evmClient := range te.evmClients {
+		for _, chainlinkNode := range te.ClCluster.Nodes {
+			fundedKeys, err := chainlinkNode.API.ExportEVMKeysForChain(te.evmClients[0].GetChainID().String())
+			if err != nil {
+				return err
+			}
+			for _, key := range fundedKeys {
+				keyToDecrypt, err := json.Marshal(key)
+				if err != nil {
+					return err
+				}
+				// This can take up a good bit of RAM and time. When running on the remote-test-runner, this can lead to OOM
+				// issues. So we avoid running in parallel; slower, but safer.
+				decryptedKey, err := keystore.DecryptKey(keyToDecrypt, client.ChainlinkKeyPassword)
+				if err != nil {
+					return err
+				}
+				if te.evmClients[0] != nil {
+					te.l.Debug().
+						Str("ChainId", evmClient.GetChainID().String()).
+						Msg("Returning funds from chainlink node")
+					if err = evmClient.ReturnFunds(decryptedKey.PrivateKey); err != nil {
+						// If we fail to return funds from one, go on to try the others anyway
+						te.l.Error().Err(err).Str("Node", chainlinkNode.ContainerName).Msg("Error returning funds from node")
+					}
+				}
+			}
+		}
+	}
+
+	for _, sethClient := range te.sethClients {
+		if err := actions_seth.ReturnFunds(te.l, sethClient, contracts.ChainlinkClientToChainlinkNodeWithKeysAndAddress(te.ClCluster.NodeAPIs())); err != nil {
+			te.l.Error().Err(err).Msg("Error returning funds from node")
+		}
+	}
+
+	te.l.Info().Msg("Returned funds from Chainlink nodes")
+	return nil
+}
+
+func (te *CLClusterTestEnv) GetEVMClient(chainId int64) (blockchain.EVMClient, error) {
+	if evmClient, ok := te.evmClients[chainId]; ok {
+		return evmClient, nil
+	}
+
+	return nil, fmt.Errorf("no EVMClient available for chain ID %d", chainId)
+}
+
+func (te *CLClusterTestEnv) GetSethClient(chainId int64) (*seth.Client, error) {
+	if sethClient, ok := te.sethClients[chainId]; ok {
+		return sethClient, nil
+	}
+
+	return nil, fmt.Errorf("no Seth client available for chain ID %d", chainId)
+}
+
+func (te *CLClusterTestEnv) GetRpcProvider(chainId int64) (*test_env.RpcProvider, error) {
+	if rpc, ok := te.rpcProviders[chainId]; ok {
+		return rpc, nil
+	}
+
+	return nil, fmt.Errorf("no RPC provider available for chain ID %d", chainId)
+}

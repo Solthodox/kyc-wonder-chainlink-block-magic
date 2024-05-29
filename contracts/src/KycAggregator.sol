@@ -7,6 +7,7 @@ import {LibString} from "solady/utils/LibString.sol";
 import {DataTypes} from "src/types/DataTypes.sol";
 import {IERC677} from "src/interfaces/IERC677.sol";
 import {KycDataMapping} from "src/libraries/KycDataMapping.sol";
+import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 
 /// @title KycAggregator
 /// @notice On-chain anonymous KYC oracle
@@ -18,6 +19,7 @@ contract KycAggregator is FunctionsClient {
     using LibString for address;
     using FunctionsRequest for FunctionsRequest.Request;
     using KycDataMapping for DataTypes.UserKycMap;
+    using SafeTransferLib for address;
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                         ERRORS                             */
@@ -27,10 +29,13 @@ contract KycAggregator is FunctionsClient {
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                         EVENTS                             */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
-
     event CreateRequest(bytes32 indexed requestId, address indexed account);
     event Success(bytes32 indexed requestId, uint256 indexed kycMap);
     event Error(bytes32 indexed requestId, bytes err);
+
+    uint256 constant _CREATE_REQUEST_EVENT_SIGNATURE = 0x057f1ad94a0d2d906f5b9ef2a92079dd6dfb4848ae16f8ec3f3842e92986d289;
+    uint256 constant _SUCCESS_EVENT_SIGNATURE = 0x2fd98f16e3e0ef7b9373ea49ea6b76b871c7f2aa1e2c222747ef5bfb26de18b3;
+    uint256 constant _ERROR_EVENT_SIGNATURE = 0x9618f687efdd85218591cc4fe2d61f964e379f1e4eb340005d145a31d9dbae7d;
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                         STORAGE                            */
@@ -53,7 +58,7 @@ contract KycAggregator is FunctionsClient {
         "const wallet = args[0];"
         "const providerId = args[1];"
         "const apiResponse = await Functions.makeHttpRequest({"
-        "url: `https://cloud.kycwonder.workers.dev/api/fetch-Kyc-Data/${wallet}/${providerId}`,"
+        "url: `https://kycworker.kycwonder.workers.dev/kyc/${wallet}/${providerId}`,"
         "headers: {"
         "'Content-Type': 'application/json',"
         "'x-api-key': secrets.apiKey"
@@ -67,11 +72,11 @@ contract KycAggregator is FunctionsClient {
         "return Functions.encodeUint256(dataToEncode);";
 
     /// @notice Cache the account that initialized each API call
-    mapping(bytes32 requestId => address account) private requestToAccount;
+    mapping(bytes32 requestId => address account) public requestToAccount;
     /// @notice Cache the provider id of the account that initialized each API call
-    mapping(bytes32 requestId => uint256 providerId) private requestToProvider;
+    mapping(bytes32 requestId => uint256 providerId) public requestToProvider;
     /// @notice Store KYC data of each address in a bitmap
-    mapping(address => DataTypes.UserKycMap) private kycData;
+    mapping(address => DataTypes.UserKycMap) public kycData;
     /// @notice Operator permissions to request KYC data
     mapping(address => mapping(address => bool)) public isApprovedOperator;
 
@@ -105,7 +110,7 @@ contract KycAggregator is FunctionsClient {
         }
 
         // Request creator must pay for the LINK costs +fee
-        // _pullPayment();
+        //_pullPayment(account);
 
         // Initialize request with our source JS code
         FunctionsRequest.Request memory req;
@@ -120,7 +125,6 @@ contract KycAggregator is FunctionsClient {
         }
         // Add API call parameters to the request
         req.setArgs(_buildArgs(account, providerId));
-
         // Process the request
         requestId = _sendRequest(
             req.encodeCBOR(),
@@ -129,10 +133,19 @@ contract KycAggregator is FunctionsClient {
             donID
         );
         // Cache the account and providerId
-        requestToAccount[requestId] = account;
-        requestToProvider[requestId] = providerId;
+        assembly ("memory-safe"){
+            // requestToAccount[requestId] = account;
+            // requestToProvider[requestId] = providerId;
+            mstore(0x00, requestId)
+            mstore(0x20, requestToAccount.slot)
+            sstore(keccak256(0x00,0x40), account)
+            mstore(0x20, requestToProvider.slot)
+            sstore(keccak256(0x00,0x40), providerId)
 
-        emit CreateRequest(requestId, account);
+            // emit CreateRequest(requestId, account);
+            mstore(0x00, account)
+            log2(0x00,0x20, _CREATE_REQUEST_EVENT_SIGNATURE, requestId)
+        }
     }
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
@@ -198,8 +211,18 @@ contract KycAggregator is FunctionsClient {
             });
             packedKycData.setLastUpdatedAt(block.timestamp);
             packedKycData.setProvider(requestToProvider[requestId]);
-            kycData[requestToAccount[requestId]] = packedKycData;
-            emit Success(requestId, bitmap);
+            
+            assembly ("memory-safe"){
+                // kycData[requestToAccount[requestId]] = packedKycData;
+                mstore(0x00,requestId)
+                mstore(0x20, requestToAccount.slot)
+                mstore(0x20,sload(keccak256(0x00,0x40)))
+                sstore(keccak256(0x00, 0x40), packedKycData)
+
+                // emit Success(requestId, bitmap);
+                mstore(0x00, packedKycData)
+                log2(0x00, 0x20, _SUCCESS_EVENT_SIGNATURE, requestId)
+            }
         } else {
             emit Error(requestId, err);
         }
@@ -224,27 +247,38 @@ contract KycAggregator is FunctionsClient {
     }
 
     function _pullPayment(address _account) internal {
-        LINK.transferFrom(
+        address(LINK).safeTransferFrom(
             _account,
             address(this),
             SERVICE_COSTS + PROTOCOL_FEE
         );
-        // Fill the Link balance of Functions provider
-        LINK.transferAndCall(
-            FUNCTIONS_ROUTER,
-            SERVICE_COSTS,
-            abi.encode(subscriptionId)
-        );
-        LINK.transfer(treasury, PROTOCOL_FEE);
+        LINK.transferAndCall(FUNCTIONS_ROUTER, SERVICE_COSTS, abi.encode(subscriptionId));
+        address(LINK).safeTransfer(treasury, PROTOCOL_FEE);
     }
+
 
     function _buildArgs(
         address _account,
         uint256 _providerId
     ) internal pure returns (string[] memory) {
+        // Convert the values using the library functions
+        string memory accountHex = _account.toHexString();
+        string memory providerIdStr = _providerId.toString();
+
+        // Allocate memory for the string array
         string[] memory args = new string[](2);
-        args[0] = _account.toHexString();
-        args[1] = _providerId.toString();
+
+        assembly ("memory-safe") {
+            // Store the pointer to the array in memory
+            let argsPtr := add(args, 0x20)
+
+            // Store the first string (accountHex) in the array
+            mstore(argsPtr, accountHex)
+
+            // Store the second string (providerIdStr) in the array
+            mstore(add(argsPtr, 0x20), providerIdStr)
+        }
+
         return args;
     }
 }

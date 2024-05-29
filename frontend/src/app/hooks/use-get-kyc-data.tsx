@@ -28,7 +28,8 @@ function useGetKycData(url: string, address: string | null): IdentitiesType {
       try {
         const response = await axios.get(`${url}/user/${address}`, {
           headers: {
-            "x-api-key": process.env.NEXT_PUBLIC_KEY,
+            "content-type": "application/json",
+            "x-api-key": "947b3345c432d9ef866b76f3938c65a2e7734c1d77f30bb79cc314c4c5ce5a29",
           },
         });
         console.log(response);

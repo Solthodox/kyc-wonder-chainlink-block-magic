@@ -33,7 +33,7 @@ function usePostKycAddress<ErrorType = AxiosError>(url: string) {
           `${url}/user/add-address/${mainAddress}/${newAddress}`,
           {
             headers: {
-              "x-api-key": process.env.NEXT_PUBLIC_KEY,
+              "x-api-key": '947b3345c432d9ef866b76f3938c65a2e7734c1d77f30bb79cc314c4c5ce5a29',//process.env.NEXT_PUBLIC_KEY,
             },
           }
         );

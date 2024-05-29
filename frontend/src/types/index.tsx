@@ -6,11 +6,14 @@ export interface IdentitiesType {
     error: AxiosError | null
     loading: boolean
     identities: any[] | null
-  }
-
+}
 export interface KycData {
     name: string
     yearOfBirth: string
     address: string
     country: string
-  }
+}
+export interface AddressData {
+  mainAddress: string
+  newAddress: string
+}

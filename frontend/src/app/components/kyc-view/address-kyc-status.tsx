@@ -1,18 +1,21 @@
-'use client'
+"use client";
 
-import { type ComponentPropsWithoutRef, type FC } from 'react'
-import { useReadContract, useWriteContract } from 'wagmi'
+import { type ComponentPropsWithoutRef, type FC } from "react";
+import { useReadContract, useWriteContract } from "wagmi";
 import {
+  baseApiUrl,
   donHostedSecretsSlot,
   donHostedSecretsVersion,
   IKycAggregatorABI,
-  kycAggregatorAddress
-} from '../../../../statics'
-import { type LatestKycData } from '@/types'
+  kycAggregatorAddress,
+} from "../../../../statics";
+import { type LatestKycData } from "@/types";
+import usePostKycAddress from "@/app/hooks/use-post-kyc-address";
 
-interface Props extends ComponentPropsWithoutRef<'tr'> {
-  address: `0x${string}`
-  permission: string
+interface Props extends ComponentPropsWithoutRef<"tr"> {
+  mainAddress: `0x${string}`;
+  address: `0x${string}`;
+  permission: string;
 }
 
 /**
@@ -21,23 +24,30 @@ interface Props extends ComponentPropsWithoutRef<'tr'> {
  *
  * @param props - React component props for a <tr> element.
  */
-export const AddressKycStatus: FC<Props> = ({ address, permission }) => {
+export const AddressKycStatus: FC<Props> = ({
+  mainAddress,
+  address,
+  permission,
+}) => {
   // Hook to read on-chain KYC data for the given address
   const { data: onChainKycData } = useReadContract({
     address: kycAggregatorAddress as unknown as `0x${string}`,
     abi: IKycAggregatorABI,
-    functionName: 'getLatestKycData',
-    args: [address]
-  })
+    functionName: "getLatestKycData",
+    args: [address],
+  });
 
   // Cast to avoid TS compiler warning
-  const latestKycData = onChainKycData as LatestKycData
+  const latestKycData = onChainKycData as LatestKycData;
   // Hook to write to the contract, requesting KYC data
-  const { writeContract } = useWriteContract()
+  const { writeContract } = useWriteContract();
+
+  const { success, error, loading, postAddress } =
+    usePostKycAddress(baseApiUrl);
 
   const kycModal = document.getElementById(
-    'kyc_modal'
-  ) as HTMLDialogElement | null
+    "kyc_modal"
+  ) as HTMLDialogElement | null;
 
   /**
    * Handle form submission to request KYC data activation.
@@ -45,15 +55,20 @@ export const AddressKycStatus: FC<Props> = ({ address, permission }) => {
    * @param event - Form submission event.
    */
   const handleClick = async (): Promise<void> => {
-    console.log('activate')
-
-    writeContract({
+    console.log("activate");
+    // Link the address to the main address in the bakcend
+    postAddress({
+      mainAddress,
+      newAddress: address,
+    });
+    // Fetch new KYC data on-chain
+    https: writeContract({
       address: kycAggregatorAddress as unknown as `0x${string}`,
       abi: IKycAggregatorABI,
-      functionName: 'requestKycData',
-      args: [donHostedSecretsSlot, donHostedSecretsVersion, address, '1']
-    })
-  }
+      functionName: "requestKycData",
+      args: [donHostedSecretsSlot, donHostedSecretsVersion, address, "1"],
+    });
+  };
 
   return (
     <tr>
@@ -63,13 +78,13 @@ export const AddressKycStatus: FC<Props> = ({ address, permission }) => {
       </td>
 
       {/* Display permission with conditional styling for Admin */}
-      <td className={permission === 'Admin' ? 'text-primary' : ''}>
+      <td className={permission === "Admin" ? "text-primary" : ""}>
         {permission}
       </td>
 
       {/* Display on-chain KYC status and activation button */}
       <td>
-        {latestKycData && latestKycData['0'] != 0 ? (
+        {latestKycData && latestKycData["0"].toString() !== "0" ? (
           <>Yes</>
         ) : (
           <>
@@ -102,5 +117,5 @@ export const AddressKycStatus: FC<Props> = ({ address, permission }) => {
         )}
       </td>
     </tr>
-  )
-}
+  );
+};

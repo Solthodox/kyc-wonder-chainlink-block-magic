@@ -26,7 +26,7 @@ function useGetKycData(url: string, address: string | null): IdentitiesType {
       setError(null)
 
       try {
-        const response = await axios.get(`${url}/fetch-addresses/${address}`)
+        const response = await axios.get(`${url}/user/${address}`)
         console.log(response)
         setSuccess('200')
         setIdentities(response.data.data)

@@ -1,18 +1,18 @@
-'use client'
+"use client";
 
-import { Key, FC } from 'react'
-import Link from 'next/link'
-import { useAccount, useReadContract } from 'wagmi'
-import useGetKycData from '@/app/hooks/use-get-kyc-data'
-import { AddressKycStatus } from './address-kyc-status'
+import { Key, FC } from "react";
+import Link from "next/link";
+import { useAccount, useReadContract } from "wagmi";
+import useGetKycData from "@/app/hooks/use-get-kyc-data";
+import { AddressKycStatus } from "./address-kyc-status";
 import {
   baseApiUrl,
   IKycAggregatorABI,
-  kycAggregatorAddress
-} from '../../../../statics'
-import { LatestKycData } from '@/types'
+  kycAggregatorAddress,
+} from "../../../../statics";
+import { LatestKycData } from "@/types";
 
-interface Props extends React.ComponentPropsWithoutRef<'nav'> {}
+interface Props extends React.ComponentPropsWithoutRef<"nav"> {}
 
 /**
  * The KycView component fetches and displays KYC and identity information
@@ -20,23 +20,23 @@ interface Props extends React.ComponentPropsWithoutRef<'nav'> {}
  *
  * @param props - React component props for a <nav> element.
  */
-export const KycView: FC<Props> = props => {
+export const KycView: FC<Props> = (props) => {
   // Retrieve the current wallet address using wagmi hook
-  const { address } = useAccount()
+  const { address } = useAccount();
 
   // Fetch KYC data using a custom hook, passing the base API URL and wallet address
   const { success, error, loading, identities } = useGetKycData(
     baseApiUrl,
     address ? (address as `0x${string}`) : null
-  )
+  );
   const { data: onChainKycData } = useReadContract({
     address: kycAggregatorAddress as unknown as `0x${string}`,
     abi: IKycAggregatorABI,
-    functionName: 'getLatestKycData',
-    args: [address]
-  })
+    functionName: "getLatestKycData",
+    args: [address],
+  });
 
-  const latestKycData = onChainKycData as unknown as LatestKycData
+  const latestKycData = onChainKycData as unknown as LatestKycData;
 
   return (
     <div className="mb-8">
@@ -78,7 +78,7 @@ export const KycView: FC<Props> = props => {
             </table>
             {/* Link to view KYC oracle contract on Etherscan */}
             <p className="font-semibold my-4">
-              You can see the KYC oracle{' '}
+              You can see the KYC oracle{" "}
               <a
                 className="text-blue-500 underline"
                 target="_blank"
@@ -93,7 +93,7 @@ export const KycView: FC<Props> = props => {
         {/* Error message with link to KYC form */}
         {error && (
           <li className="text-red-500">
-            KYC not passed. Please fill the{' '}
+            KYC not passed. Please fill the{" "}
             <Link href="/kyc" className="text-blue-500 underline">
               <u>form</u>
             </Link>
@@ -117,8 +117,9 @@ export const KycView: FC<Props> = props => {
           {identities?.map((identity: { address: string }, index: Key) => (
             <AddressKycStatus
               key={index}
+              mainAddress={identities[0]}
               address={identity.address as `0x${string}`}
-              permission={index === 0 ? 'Admin' : 'Secondary'}
+              permission={index === 0 ? "Admin" : "Secondary"}
             />
           ))}
         </tbody>
@@ -129,5 +130,5 @@ export const KycView: FC<Props> = props => {
         New identity
       </button>
     </div>
-  )
-}
+  );
+};

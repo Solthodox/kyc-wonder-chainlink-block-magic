@@ -33,10 +33,6 @@ contract KycAggregator is FunctionsClient {
     event Success(bytes32 indexed requestId, uint256 indexed kycMap);
     event Error(bytes32 indexed requestId, bytes err);
 
-    uint256 constant _CREATE_REQUEST_EVENT_SIGNATURE = 0x057f1ad94a0d2d906f5b9ef2a92079dd6dfb4848ae16f8ec3f3842e92986d289;
-    uint256 constant _SUCCESS_EVENT_SIGNATURE = 0x2fd98f16e3e0ef7b9373ea49ea6b76b871c7f2aa1e2c222747ef5bfb26de18b3;
-    uint256 constant _ERROR_EVENT_SIGNATURE = 0x9618f687efdd85218591cc4fe2d61f964e379f1e4eb340005d145a31d9dbae7d;
-
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                         STORAGE                            */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
@@ -133,19 +129,16 @@ contract KycAggregator is FunctionsClient {
             donID
         );
         // Cache the account and providerId
-        assembly ("memory-safe"){
+        assembly ("memory-safe") {
             // requestToAccount[requestId] = account;
             // requestToProvider[requestId] = providerId;
             mstore(0x00, requestId)
             mstore(0x20, requestToAccount.slot)
-            sstore(keccak256(0x00,0x40), account)
+            sstore(keccak256(0x00, 0x40), account)
             mstore(0x20, requestToProvider.slot)
-            sstore(keccak256(0x00,0x40), providerId)
-
-            // emit CreateRequest(requestId, account);
-            mstore(0x00, account)
-            log2(0x00,0x20, _CREATE_REQUEST_EVENT_SIGNATURE, requestId)
+            sstore(keccak256(0x00, 0x40), providerId)
         }
+        emit CreateRequest(requestId, account);
     }
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
@@ -211,18 +204,9 @@ contract KycAggregator is FunctionsClient {
             });
             packedKycData.setLastUpdatedAt(block.timestamp);
             packedKycData.setProvider(requestToProvider[requestId]);
-            
-            assembly ("memory-safe"){
-                // kycData[requestToAccount[requestId]] = packedKycData;
-                mstore(0x00,requestId)
-                mstore(0x20, requestToAccount.slot)
-                mstore(0x20,sload(keccak256(0x00,0x40)))
-                sstore(keccak256(0x00, 0x40), packedKycData)
 
-                // emit Success(requestId, bitmap);
-                mstore(0x00, packedKycData)
-                log2(0x00, 0x20, _SUCCESS_EVENT_SIGNATURE, requestId)
-            }
+            kycData[requestToAccount[requestId]] = packedKycData;
+            emit Success(requestId, bitmap);
         } else {
             emit Error(requestId, err);
         }
@@ -252,10 +236,13 @@ contract KycAggregator is FunctionsClient {
             address(this),
             SERVICE_COSTS + PROTOCOL_FEE
         );
-        LINK.transferAndCall(FUNCTIONS_ROUTER, SERVICE_COSTS, abi.encode(subscriptionId));
+        LINK.transferAndCall(
+            FUNCTIONS_ROUTER,
+            SERVICE_COSTS,
+            abi.encode(subscriptionId)
+        );
         address(LINK).safeTransfer(treasury, PROTOCOL_FEE);
     }
-
 
     function _buildArgs(
         address _account,

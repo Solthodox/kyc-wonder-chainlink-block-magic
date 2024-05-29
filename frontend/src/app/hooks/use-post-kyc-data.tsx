@@ -38,7 +38,7 @@ function usePostKycData<ErrorType = AxiosError>(url: string) {
     setError(null)
 
     try {
-      const response = await axios.post(`${url}/mockData/data/${address}`, {
+      const response = await axios.post(`${url}/mock-data/data/${address}`, {
         name,
         yearOfBirth: Number(yearOfBirth),
         country,

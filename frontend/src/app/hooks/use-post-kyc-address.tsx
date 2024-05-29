@@ -30,7 +30,12 @@ function usePostKycAddress<ErrorType = AxiosError>(url: string) {
     else {
       try {
         const response = await axios.post(
-          `${url}/user/add-address/${mainAddress}/${newAddress}`
+          `${url}/user/add-address/${mainAddress}/${newAddress}`,
+          {
+            headers: {
+              "x-api-key": process.env.NEXT_PUBLIC_KEY,
+            },
+          }
         );
         console.log(response);
         setSuccess("200"); // Success state as string

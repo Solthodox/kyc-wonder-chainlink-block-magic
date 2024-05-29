@@ -1,6 +1,7 @@
 import { AxiosError } from "axios"
 
-export type LatestKycData = [BigInt, boolean, BigInt, BigInt, BigInt, , BigInt, BigInt]
+export type LatestKycData = [BigInt, boolean, BigInt, BigInt, BigInt, BigInt, BigInt]
+
 export interface IdentitiesType {
     success: string | null
     error: AxiosError | null

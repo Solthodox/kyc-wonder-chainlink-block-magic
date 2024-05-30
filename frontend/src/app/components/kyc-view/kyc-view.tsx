@@ -13,7 +13,6 @@ import {
 import { LatestKycData } from "@/types";
 import { parseCreditScore } from "./parse-credit-score";
 import usePostKycAddress from "@/app/hooks/use-post-kyc-address";
-import { useState } from "react";
 
 interface Props extends React.ComponentPropsWithoutRef<"nav"> {}
 
@@ -40,8 +39,6 @@ export const KycView: FC<Props> = (props) => {
   });
 
   const { postAddress } = usePostKycAddress(baseApiUrl);
-
-  const [newIdentity, setNewIdentity] = useState<string | null>(null);
 
   const identityModal = document.getElementById(
     "identity_modal"
@@ -152,18 +149,8 @@ export const KycView: FC<Props> = (props) => {
           <h3 className="font-bold text-lg">
             Please introduce new identity address
           </h3>
-          <input onChange={(e) => setNewIdentity(e.target.value)} type="text" />
           <div className="modal-action">
-            <button
-              onClick={() => {
-                if (newIdentity) {
-                  handleClick(newIdentity);
-                }
-              }}
-              className="btn"
-            >
-              Add
-            </button>
+            <button>Add</button>
             <form method="dialog">
               <button className="btn">Close</button>
             </form>

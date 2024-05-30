@@ -4,7 +4,7 @@ export const IKycAggregatorABI = IKycAggregator;
 export const kycAggregatorAddress: string =
   "0xDACb0276B506D97a327e56E62e2804033fE18714";
 export const donHostedSecretsSlot: string = "0";
-export const donHostedSecretsVersion: string = "1716986273";
+export const donHostedSecretsVersion: string = "1717083137";
 export const baseApiUrl: string = "https://kycworker.kycwonder.workers.dev";
 export const defaultProvider: string = "1";
 export const countries: { code: string; name: string }[] = [

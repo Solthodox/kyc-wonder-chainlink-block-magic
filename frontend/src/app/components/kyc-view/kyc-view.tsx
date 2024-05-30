@@ -144,7 +144,7 @@ export const KycView: FC<Props> = (props) => {
         New identity
       </button>
 
-      <dialog id="kyc_modal" className="modal">
+      <dialog id="identity_modal" className="modal">
         <div className="modal-box text-base-300">
           <h3 className="font-bold text-lg">
             Please introduce new identity address

@@ -11,6 +11,7 @@ import {
   kycAggregatorAddress,
 } from "../../../../statics";
 import { LatestKycData } from "@/types";
+import { parseCreditScore } from "./parse-credit-score";
 
 interface Props extends React.ComponentPropsWithoutRef<"nav"> {}
 
@@ -48,34 +49,28 @@ export const KycView: FC<Props> = (props) => {
           <p className="text-warning">Please connect your wallet.</p>
         )}
         {/* Loading indicator */}
-        {loading && <span>Loading...</span>}
+        {loading && <span className="loading loading-ring loading-xs"></span>}
         {/* Success message */}
         {success && (
           <>
-            <table className="min-w-full mt-4 overflow-hidden">
-              <tbody>
-                <tr>
-                  <td>Address </td>
-                  <td>{address}</td>
-                </tr>
-                <tr>
-                  <td>Year of birth</td>
-                  <td>{latestKycData && Number(latestKycData[0])}</td>
-                </tr>
-                <tr>
-                  <td>Adult</td>
-                  <td>{latestKycData && latestKycData[1].toString()}</td>
-                </tr>
-                <tr>
-                  <td>Country</td>
-                  <td>{latestKycData && Number(latestKycData[2])}</td>
-                </tr>
-                <tr>
-                  <td>Credit Score</td>
-                  <td>{latestKycData && Number(latestKycData[3])}</td>
-                </tr>
-              </tbody>
-            </table>
+            <div className="card card-side p-1 bg-base-300 shadow-xl">
+              <figure>
+                <img src="https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.jpg" />
+              </figure>
+              <div className="card-body">
+                <h2 className="card-title">On-chain KYC data</h2>
+                <p>Address: {address}</p>
+                <p>
+                  Year of birth: {latestKycData && Number(latestKycData[0])}
+                </p>
+                <p>Adult: {latestKycData && latestKycData[1].toString()}</p>
+                <p>Country: {latestKycData && Number(latestKycData[2])}</p>
+                <p>
+                  CreditScore:{" "}
+                  {latestKycData && parseCreditScore(Number(latestKycData[3]))}
+                </p>
+              </div>
+            </div>
             {/* Link to view KYC oracle contract on Etherscan */}
             <p className="font-semibold my-4">
               You can see the KYC oracle{" "}
@@ -104,12 +99,12 @@ export const KycView: FC<Props> = (props) => {
       <hr className="w-full border-t border-base-100 mt-4 mb-4" />
       {/* Identities Section */}
       <h2 className="mt-8 text-xl font-bold">Your Identities:</h2>
-      <table className="min-w-full mt-4 overflow-hidden">
+      <table className="min-w-full table mt-4 overflow-hidden">
         <thead>
-          <tr className="bg-black text-white">
-            <th className="py-1 px-3 text-left">Address</th>
-            <th className="py-1 px-3 text-left">Permission</th>
-            <th className="py-1 px-3 text-left">Active on-chain</th>
+          <tr className="">
+            <th className="">Address</th>
+            <th className="">Permission</th>
+            <th className="">Active on-chain</th>
           </tr>
         </thead>
         <tbody>
@@ -124,7 +119,6 @@ export const KycView: FC<Props> = (props) => {
           ))}
         </tbody>
       </table>
-
       {/* Button to add new identity */}
       <button className="mt-4 bg-secondary text-primary border rounded-sm px-4 py-2">
         New identity

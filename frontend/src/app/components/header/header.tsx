@@ -1,10 +1,10 @@
-import classNames from 'classnames'
-import { type ComponentPropsWithoutRef, type FC } from 'react'
-import { FingerPrintIcon } from '@/ui/icons'
-import Link from 'next/link'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
+import classNames from "classnames";
+import { type ComponentPropsWithoutRef, type FC } from "react";
+import { FingerPrintIcon } from "@/ui/icons";
+import Link from "next/link";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
-interface Props extends ComponentPropsWithoutRef<'nav'> {}
+interface Props extends ComponentPropsWithoutRef<"nav"> {}
 
 /**
  * Header component renders the navigation bar with the application title,
@@ -12,13 +12,13 @@ interface Props extends ComponentPropsWithoutRef<'nav'> {}
  *
  * @param props - React component props for a <nav> element.
  */
-export const Header: FC<Props> = props => {
-  const { className, ...restProps } = props
+export const Header: FC<Props> = (props) => {
+  const { className, ...restProps } = props;
 
   return (
     <nav
       className={classNames(
-        'bg-base-300 px-6 py-4 border-b-2 border-base-100',
+        "bg-base-300  px-6 py-4 border-b-2 border-base-100",
         className
       )}
       {...restProps}
@@ -44,5 +44,5 @@ export const Header: FC<Props> = props => {
         <ConnectButton showBalance={false} />
       </div>
     </nav>
-  )
-}
+  );
+};

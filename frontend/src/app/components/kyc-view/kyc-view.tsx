@@ -12,6 +12,7 @@ import {
 } from "../../../../statics";
 import { LatestKycData } from "@/types";
 import { parseCreditScore } from "./parse-credit-score";
+import usePostKycAddress from "@/app/hooks/use-post-kyc-address";
 
 interface Props extends React.ComponentPropsWithoutRef<"nav"> {}
 
@@ -37,6 +38,22 @@ export const KycView: FC<Props> = (props) => {
     args: [address],
   });
 
+  const { postAddress } = usePostKycAddress(baseApiUrl);
+
+  const identityModal = document.getElementById(
+    "identity_modal"
+  ) as HTMLDialogElement | null;
+
+  const handleClick = async (addAddress: string): Promise<void> => {
+    console.log("add identity");
+    if (identities) {
+      // Link the address to the main address in the bakcend
+      postAddress({
+        mainAddress: identities[0],
+        newAddress: addAddress,
+      });
+    }
+  };
   const latestKycData = onChainKycData as unknown as LatestKycData;
 
   return (
@@ -120,9 +137,28 @@ export const KycView: FC<Props> = (props) => {
         </tbody>
       </table>
       {/* Button to add new identity */}
-      <button className="mt-4 bg-secondary text-primary border rounded-sm px-4 py-2">
+      <button
+        onClick={() => identityModal?.showModal()}
+        className="mt-4 bg-secondary text-primary border rounded-sm px-4 py-2"
+      >
         New identity
       </button>
+
+      <dialog id="kyc_modal" className="modal">
+        <div className="modal-box text-base-300">
+          <h3 className="font-bold text-lg">
+            Please introduce new identity address
+          </h3>
+          <div className="modal-action">
+            <button onClick={handleClick} className="btn">
+              Add
+            </button>
+            <form method="dialog">
+              <button className="btn">Close</button>
+            </form>
+          </div>
+        </div>
+      </dialog>
     </div>
   );
 };

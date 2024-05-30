@@ -33,12 +33,12 @@ export const AddressKycStatus: FC<Props> = ({
   const { data: onChainKycData } = useReadContract({
     address: kycAggregatorAddress as unknown as `0x${string}`,
     abi: IKycAggregatorABI,
-    functionName: "getLatestKycData",
+    functionName: "hasKycData",
     args: [address],
   });
 
   // Cast to avoid TS compiler warning
-  const latestKycData = onChainKycData as LatestKycData;
+  const hasKycData = Boolean(onChainKycData) as boolean;
   // Hook to write to the contract, requesting KYC data
   const { writeContract } = useWriteContract();
 
@@ -89,7 +89,7 @@ export const AddressKycStatus: FC<Props> = ({
 
       {/* Display on-chain KYC status and activation button */}
       <td>
-        {latestKycData && latestKycData["0"].toString() !== "0" ? (
+        {hasKycData ? (
           <>Yes</>
         ) : (
           <>

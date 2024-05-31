@@ -251,5 +251,5 @@ const numericCodeToIso3166Alpha3Map: Record<number, string> = {
 };
 
 export function parseCountry(country: number): string {
-  return numericCodeToIso3166Alpha3Map[`${country}`];
+  return numericCodeToIso3166Alpha3Map[country.toString()];
 }

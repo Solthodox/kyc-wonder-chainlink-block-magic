@@ -1,77 +1,88 @@
-'use client'
-import classNames from 'classnames'
-import { useState } from 'react'
-import { type ComponentPropsWithoutRef, type FC } from 'react'
+"use client";
+import classNames from "classnames";
+import { useState } from "react";
+import { type ComponentPropsWithoutRef, type FC } from "react";
 
-import { useAccount } from 'wagmi'
-import Link from 'next/link'
-import usePostKycData from '@/app/hooks/use-post-kyc-data'
-import { baseApiUrl, countries } from '../../../../statics'
+import { useAccount } from "wagmi";
+import Link from "next/link";
+import usePostKycData from "@/app/hooks/use-post-kyc-data";
+import { baseApiUrl, countries } from "../../../../statics";
 
-interface Props extends ComponentPropsWithoutRef<'form'> {}
+interface Props extends ComponentPropsWithoutRef<"form"> {}
 
 /**
  * Form component for submitting KYC and credit score data.
  *
  * @param props - React component props for a <form> element.
  */
-export const Form: FC<Props> = props => {
-  const { className } = props
+export const Form: FC<Props> = (props) => {
+  const { className } = props;
 
   // Wallet data
-  const { address } = useAccount()
+  const { address } = useAccount();
   // Post hook
-  const { success, error, loading, postData } = usePostKycData(baseApiUrl)
+  const { success, error, loading, postData } = usePostKycData(baseApiUrl);
 
   // KYC
-  const [name, setName] = useState<string | null>(null)
-  const [yearOfBirth, setYearOfBirth] = useState<string | null>(null)
-  const [country, setCountry] = useState<string | null>(null)
+  const [name, setName] = useState<string | null>(null);
+  const [yearOfBirth, setYearOfBirth] = useState<string | null>(null);
+  const [country, setCountry] = useState<string | null>(null);
 
   // Credit Score
-  const [annualIncome, setAnnualIncome] = useState<string | null>(null)
-  const [salary, setSalary] = useState<string | null>(null)
-  const [bankAccounts, setBankAccounts] = useState<string | null>(null)
-  const [creditCards, setCreditCards] = useState<string | null>(null)
-  const [loans, setLoans] = useState<string | null>(null)
-  const [delay, setDelay] = useState<string | null>(null)
-  const [delayedPayments, setDelayedPayments] = useState<string | null>(null)
-  const [creditMix, setCreditMix] = useState<string | null>(null)
-  const [outstandingDebt, setOutstandingDebt] = useState<string | null>(null)
-  const [creditHistory, setCreditHistory] = useState<string | null>(null)
-  const [monthlyBalance, setMonthlyBalance] = useState<string | null>(null)
+  const [annualIncome, setAnnualIncome] = useState<string | null>(null);
+  const [salary, setSalary] = useState<string | null>(null);
+  const [bankAccounts, setBankAccounts] = useState<string | null>(null);
+  const [creditCards, setCreditCards] = useState<string | null>(null);
+  const [loans, setLoans] = useState<string | null>(null);
+  const [delay, setDelay] = useState<string | null>(null);
+  const [delayedPayments, setDelayedPayments] = useState<string | null>(null);
+  const [creditMix, setCreditMix] = useState<string | null>(null);
+  const [outstandingDebt, setOutstandingDebt] = useState<string | null>(null);
+  const [creditHistory, setCreditHistory] = useState<string | null>(null);
+  const [monthlyBalance, setMonthlyBalance] = useState<string | null>(null);
 
   const handleSubmit = async (event: { preventDefault: () => void }) => {
-    event.preventDefault()
+    event.preventDefault();
     // Simulate form submission here (e.g., send data to backend)
     postData({
       name: name as string,
       yearOfBirth: yearOfBirth as string,
       address: address as `0x${string}`,
-      country: country as string
-    })
+      country: country as string,
+      annualIncome: annualIncome as string,
+      salary: salary as string,
+      bankAccounts: bankAccounts as string,
+      creditCards: creditCards as string,
+      loans: loans as string,
+      delay: delay as string,
+      delayedPayments: delayedPayments as string,
+      creditMix: creditMix as string,
+      outstandingDebt: outstandingDebt as string,
+      creditHistory: creditHistory as string,
+      monthlyBalance: monthlyBalance as string,
+    });
 
-    setName(null)
-    setYearOfBirth(null)
-    setCountry(null)
-    setAnnualIncome(null)
-    setSalary(null)
-    setBankAccounts(null)
-    setCreditCards(null)
-    setLoans(null)
-    setDelay(null)
-    setDelayedPayments(null)
-    setCreditMix(null)
-    setOutstandingDebt(null)
-    setCreditHistory(null)
-    setMonthlyBalance(null)
-  }
+    setName(null);
+    setYearOfBirth(null);
+    setCountry(null);
+    setAnnualIncome(null);
+    setSalary(null);
+    setBankAccounts(null);
+    setCreditCards(null);
+    setLoans(null);
+    setDelay(null);
+    setDelayedPayments(null);
+    setCreditMix(null);
+    setOutstandingDebt(null);
+    setCreditHistory(null);
+    setMonthlyBalance(null);
+  };
 
   return (
     <form
       onSubmit={handleSubmit}
-      className={classNames('navbar-box-shadow py-4 bg-base-300 px-6', [
-        className
+      className={classNames("navbar-box-shadow py-4 bg-base-300 px-6", [
+        className,
       ])}
     >
       <h2 className="font-bold text-xl mb-4">KYC data:</h2>
@@ -84,7 +95,7 @@ export const Form: FC<Props> = props => {
         name="name"
         placeholder="Enter your year of birth"
         value={name as string}
-        onChange={e => setName(e.target.value)}
+        onChange={(e) => setName(e.target.value)}
       />
       <br />
       <br />
@@ -107,7 +118,7 @@ export const Form: FC<Props> = props => {
         name="year-of-birth"
         placeholder="Enter your year of birth"
         value={yearOfBirth as string}
-        onChange={e => setYearOfBirth(e.target.value)}
+        onChange={(e) => setYearOfBirth(e.target.value)}
       />
       <br />
       <br />
@@ -115,7 +126,7 @@ export const Form: FC<Props> = props => {
       <label htmlFor="Country">Country:</label>
       <select
         value={country as string}
-        onChange={e => setCountry(e.target.value)}
+        onChange={(e) => setCountry(e.target.value)}
         className="bg-base-300 ml-2 cursor-pointer"
         id="country"
         name="country"
@@ -133,7 +144,7 @@ export const Form: FC<Props> = props => {
       <br />
       <br />
       <hr className="w-full border-t border-base-100 mt-4 mb-4" />
-      <h2 className="font-bold text-xl mb-4">Credit Score:</h2>
+      <h2 className="font-bold mt-16 text-xl mb-4">Credit Score:</h2>
       <label htmlFor="annual-income">Annual income:</label>
       <input
         required
@@ -143,7 +154,7 @@ export const Form: FC<Props> = props => {
         name="annual-income"
         placeholder="Enter you annual income"
         value={annualIncome as string}
-        onChange={e => setAnnualIncome(e.target.value)}
+        onChange={(e) => setAnnualIncome(e.target.value)}
       />
       <br />
       <br />
@@ -157,7 +168,7 @@ export const Form: FC<Props> = props => {
         name="salary"
         placeholder="Enter your year of birth"
         value={salary as string}
-        onChange={e => setSalary(e.target.value)}
+        onChange={(e) => setSalary(e.target.value)}
       />
       <br />
       <br />
@@ -171,7 +182,7 @@ export const Form: FC<Props> = props => {
         name="bank-accounts"
         placeholder="Enter how many bank accounts you own"
         value={bankAccounts as string}
-        onChange={e => setBankAccounts(e.target.value)}
+        onChange={(e) => setBankAccounts(e.target.value)}
       />
       <br />
       <br />
@@ -185,7 +196,7 @@ export const Form: FC<Props> = props => {
         name="credit-cards"
         placeholder="Enter how many credit cards you own"
         value={creditCards as string}
-        onChange={e => setCreditCards(e.target.value)}
+        onChange={(e) => setCreditCards(e.target.value)}
       />
       <br />
       <br />
@@ -199,7 +210,7 @@ export const Form: FC<Props> = props => {
         name="loans"
         placeholder="Enter how many loans you own"
         value={loans as string}
-        onChange={e => setLoans(e.target.value)}
+        onChange={(e) => setLoans(e.target.value)}
       />
       <br />
       <br />
@@ -213,7 +224,7 @@ export const Form: FC<Props> = props => {
         name="delay"
         placeholder="Enter how much credit cards you own"
         value={delay as string}
-        onChange={e => setDelayedPayments(e.target.value)}
+        onChange={(e) => setDelayedPayments(e.target.value)}
       />
       <br />
       <br />
@@ -227,7 +238,7 @@ export const Form: FC<Props> = props => {
         name="delayed-payments"
         placeholder="Enter how much credit cards you own"
         value={delayedPayments as string}
-        onChange={e => setDelayedPayments(e.target.value)}
+        onChange={(e) => setDelayedPayments(e.target.value)}
       />
       <br />
       <br />
@@ -241,7 +252,7 @@ export const Form: FC<Props> = props => {
         name="credit-mix"
         placeholder="Enter how much credit cards you own"
         value={creditMix as string}
-        onChange={e => setCreditMix(e.target.value)}
+        onChange={(e) => setCreditMix(e.target.value)}
       />
       <br />
       <br />
@@ -255,7 +266,7 @@ export const Form: FC<Props> = props => {
         name="outstanding-debt"
         placeholder="Enter your outstanding debt"
         value={outstandingDebt as string}
-        onChange={e => setOutstandingDebt(e.target.value)}
+        onChange={(e) => setOutstandingDebt(e.target.value)}
       />
       <br />
       <br />
@@ -269,7 +280,7 @@ export const Form: FC<Props> = props => {
         name="credit-history"
         placeholder="Enter your years of credit history"
         value={creditHistory as string}
-        onChange={e => setCreditHistory(e.target.value)}
+        onChange={(e) => setCreditHistory(e.target.value)}
       />
       <br />
       <br />
@@ -283,7 +294,7 @@ export const Form: FC<Props> = props => {
         name="monthly-balance"
         placeholder="Enter your monthly balance"
         value={monthlyBalance as string}
-        onChange={e => setMonthlyBalance(e.target.value)}
+        onChange={(e) => setMonthlyBalance(e.target.value)}
       />
       <br />
       <br />
@@ -292,14 +303,14 @@ export const Form: FC<Props> = props => {
           disabled
           className="bg-secondary text-primary border rounded-sm px-4"
         >
-          Loading...{' '}
+          Loading...{" "}
         </button>
       ) : !success && address ? (
         <button
           type="submit"
           className="bg-secondary text-primary border rounded-sm px-4"
         >
-          Submit{' '}
+          Submit{" "}
         </button>
       ) : (
         <></>
@@ -307,7 +318,7 @@ export const Form: FC<Props> = props => {
 
       {success && (
         <p className="bg-success p-4 mt-4">
-          You have been successfully KYCd! Go check your{' '}
+          You have been successfully KYCd! Go check your{" "}
           <Link href="/">
             <u>identity dashboard</u>
           </Link>
@@ -320,5 +331,5 @@ export const Form: FC<Props> = props => {
         </p>
       )}
     </form>
-  )
-}
+  );
+};

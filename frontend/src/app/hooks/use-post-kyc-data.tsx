@@ -34,7 +34,23 @@ function usePostKycData<ErrorType = AxiosError>(url: string) {
    */
   const postData = async (postData: KycData) => {
     setLoading(true);
-    const { name, yearOfBirth, address, country } = postData;
+    const {
+      name,
+      yearOfBirth,
+      address,
+      country,
+      annualIncome,
+      bankAccounts,
+      creditCards,
+      creditHistory,
+      creditMix,
+      delay,
+      delayedPayments,
+      loans,
+      monthlyBalance,
+      outstandingDebt,
+      salary,
+    } = postData;
     setError(null);
 
     try {
@@ -44,13 +60,25 @@ function usePostKycData<ErrorType = AxiosError>(url: string) {
           name,
           yearOfBirth: Number(yearOfBirth),
           country,
-          providerId: 1,
-          submissionId: generateUniqueSubmissionId(address),
-          creditScore: 2,
+          provider_id: 1,
+          submission_id: generateUniqueSubmissionId(address),
+          annual_Income: Number(annualIncome),
+          monthly_Inhand_Salary: Number(salary),
+          num_Bank_Accounts: Number(bankAccounts),
+          num_Credit_Cards: Number(creditCards),
+          interest_Rate: 4,
+          num_Loans: Number(loans),
+          delay_From_Due_Date: Number(delay),
+          num_Delayed_Payments: Number(delayedPayments),
+          credit_Mix: Number(creditMix),
+          outstanding_Debt: Number(outstandingDebt),
+          credit_History_Year: Number(creditHistory),
+          monthly_Balance: Number(monthlyBalance),
         },
         {
           headers: {
-            "x-api-key": process.env.NEXT_PUBLIC_KEY,
+            "x-api-key":
+              "947b3345c432d9ef866b76f3938c65a2e7734c1d77f30bb79cc314c4c5ce5a29",
           },
         }
       );

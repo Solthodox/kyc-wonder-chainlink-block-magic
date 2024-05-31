@@ -25,10 +25,10 @@ export const Header: FC<Props> = (props) => {
     >
       <div className="flex justify-between items-center">
         {/* Logo and Title Section */}
-        <div className="flex items-center">
+        <Link href="/" className="flex items-center">
           <h1 className="text-3xl text-primary">KYC Wonder</h1>
           <FingerPrintIcon className="fill-primary ml-2" />
-        </div>
+        </Link>
 
         {/* Navigation Links */}
         <div className="flex space-x-4 items-center">

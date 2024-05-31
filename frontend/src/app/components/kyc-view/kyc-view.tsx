@@ -13,6 +13,7 @@ import {
 import { LatestKycData } from "@/types";
 import { parseCreditScore } from "./parse-credit-score";
 import usePostKycAddress from "@/app/hooks/use-post-kyc-address";
+import { parseCountry } from "./parse-country";
 
 interface Props extends React.ComponentPropsWithoutRef<"nav"> {}
 
@@ -27,10 +28,15 @@ export const KycView: FC<Props> = (props) => {
   const { address } = useAccount();
 
   // Fetch KYC data using a custom hook, passing the base API URL and wallet address
-  const { success, error, loading, identities } = useGetKycData(
+  const { success, error, loading /* identities */ } = useGetKycData(
     baseApiUrl,
     address ? (address as `0x${string}`) : null
   );
+
+  const identities = [
+    { address: "0xa36CBC8FC9901cf16c2a20B430F0BAe54657dC9C" },
+    { address: "0x0C3E6e7E0275eC377AAC6AE02daE1Ea8438E84A5s" },
+  ];
   const { data: onChainKycData } = useReadContract({
     address: kycAggregatorAddress as unknown as `0x${string}`,
     abi: IKycAggregatorABI,
@@ -39,10 +45,6 @@ export const KycView: FC<Props> = (props) => {
   });
 
   const { postAddress } = usePostKycAddress(baseApiUrl);
-
-  const identityModal = document.getElementById(
-    "identity_modal"
-  ) as HTMLDialogElement | null;
 
   const handleClick = async (newIdentity: string): Promise<void> => {
     console.log("add identity");
@@ -70,7 +72,7 @@ export const KycView: FC<Props> = (props) => {
         {/* Success message */}
         {success && (
           <>
-            <div className="card card-side p-1 bg-base-300 shadow-xl">
+            <div className="card card-side bg-base-300 shadow-xl">
               <figure>
                 <img src="https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.jpg" />
               </figure>
@@ -81,7 +83,10 @@ export const KycView: FC<Props> = (props) => {
                   Year of birth: {latestKycData && Number(latestKycData[0])}
                 </p>
                 <p>Adult: {latestKycData && latestKycData[1].toString()}</p>
-                <p>Country: {latestKycData && Number(latestKycData[2])}</p>
+                <p>
+                  Country:{" "}
+                  {latestKycData && parseCountry(Number(latestKycData[2]))}
+                </p>
                 <p>
                   CreditScore:{" "}
                   {latestKycData && parseCreditScore(Number(latestKycData[3]))}
@@ -115,48 +120,38 @@ export const KycView: FC<Props> = (props) => {
       </ul>
       <hr className="w-full border-t border-base-100 mt-4 mb-4" />
       {/* Identities Section */}
-      <h2 className="mt-8 text-xl font-bold">Your Identities:</h2>
-      <table className="min-w-full table mt-4 overflow-hidden">
-        <thead>
-          <tr className="">
-            <th className="">Address</th>
-            <th className="">Permission</th>
-            <th className="">Active on-chain</th>
-          </tr>
-        </thead>
-        <tbody>
-          {/* Render identity rows */}
-          {identities?.map((identity: { address: string }, index: Key) => (
-            <AddressKycStatus
-              key={index}
-              mainAddress={identities[0]}
-              address={identity.address as `0x${string}`}
-              permission={index === 0 ? "Admin" : "Secondary"}
-            />
-          ))}
-        </tbody>
-      </table>
-      {/* Button to add new identity */}
-      <button
-        onClick={() => identityModal?.showModal()}
-        className="mt-4 bg-secondary text-primary border rounded-sm px-4 py-2"
-      >
-        New identity
-      </button>
-
-      <dialog id="identity_modal" className="modal">
-        <div className="modal-box text-base-300">
-          <h3 className="font-bold text-lg">
-            Please introduce new identity address
-          </h3>
-          <div className="modal-action">
-            <button>Add</button>
-            <form method="dialog">
-              <button className="btn">Close</button>
-            </form>
-          </div>
-        </div>
-      </dialog>
+      <h2 className="mt-16 text-xl font-bold mb-4">Your Identities:</h2>
+      {loading && <span className="loading loading-ring loading-xs"></span>}
+      {success && (
+        <>
+          <table className="min-w-full table mt-4 overflow-hidden">
+            <thead>
+              <tr>
+                <th>Address</th>
+                <th>Permission</th>
+                <th>Active on-chain</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* Render identity rows */}
+              {identities?.map((identity: { address: string }, index: Key) => (
+                <AddressKycStatus
+                  key={index}
+                  mainAddress={identities[0]}
+                  address={identity.address as `0x${string}`}
+                  permission={index === 0 ? "Admin" : "Secondary"}
+                />
+              ))}
+            </tbody>
+          </table>
+          <button className="mt-4 bg-secondary text-primary border rounded-sm px-4 py-2">
+            New identity
+          </button>
+        </>
+      )}
+      {error && (
+        <div className="bg-error p-4">Could not fetch any identities</div>
+      )}
     </div>
   );
 };

@@ -3,6 +3,7 @@ import classNames from "classnames";
 import { useState } from "react";
 import { type ComponentPropsWithoutRef, type FC } from "react";
 
+import Datepicker from "react-tailwindcss-datepicker";
 import { useAccount } from "wagmi";
 import Link from "next/link";
 import usePostKycData from "@/app/hooks/use-post-kyc-data";
@@ -25,7 +26,7 @@ export const Form: FC<Props> = (props) => {
 
   // KYC
   const [name, setName] = useState<string | null>(null);
-  const [yearOfBirth, setYearOfBirth] = useState<string | null>(null);
+  const [yearOfBirth, setYearOfBirth] = useState<string | any>(null);
   const [country, setCountry] = useState<string | null>(null);
 
   // Credit Score
@@ -43,6 +44,7 @@ export const Form: FC<Props> = (props) => {
 
   const handleSubmit = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
+    console.log(" ---------- ", name);
     // Simulate form submission here (e.g., send data to backend)
     postData({
       name: name as string,
@@ -62,258 +64,328 @@ export const Form: FC<Props> = (props) => {
       monthlyBalance: monthlyBalance as string,
     });
 
-    setName(null);
-    setYearOfBirth(null);
-    setCountry(null);
-    setAnnualIncome(null);
-    setSalary(null);
-    setBankAccounts(null);
-    setCreditCards(null);
-    setLoans(null);
-    setDelay(null);
-    setDelayedPayments(null);
-    setCreditMix(null);
-    setOutstandingDebt(null);
-    setCreditHistory(null);
-    setMonthlyBalance(null);
+    // setName(null);
+    // setYearOfBirth(null);
+    // setCountry(null);
+    // setAnnualIncome(null);
+    // setSalary(null);
+    // setBankAccounts(null);
+    // setCreditCards(null);
+    // setLoans(null);
+    // setDelay(null);
+    // setDelayedPayments(null);
+    // setCreditMix(null);
+    // setOutstandingDebt(null);
+    // setCreditHistory(null);
+    // setMonthlyBalance(null);
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={classNames("navbar-box-shadow py-4 bg-base-300 px-6", [
-        className,
-      ])}
-    >
+    <form onSubmit={handleSubmit} className={classNames("py-4 px-6 mt-6")}>
       <h2 className="font-bold text-xl mb-4">KYC data:</h2>
-      <label htmlFor="name">Name:</label>
-      <input
-        required
-        className="bg-base-300 ml-4"
-        type="text"
-        id="name"
-        name="name"
-        placeholder="Enter your year of birth"
-        value={name as string}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <br />
-      <br />
 
-      <label htmlFor="name">Address:</label>
-      {address ? (
-        <span className="ml-4">{address}</span>
-      ) : (
-        <span className="ml-4 text-warning">Please connect your wallet.</span>
-      )}
-      <br />
-      <br />
+      <div className="col-span-full sm:col-span-4 py-4">
+        <label htmlFor="city" className="block text-sm font-medium ">
+          Name
+        </label>
+        <div className="mt-1">
+          <input
+            required
+            type="text"
+            id="name"
+            name="name"
+            autoComplete="Paco Flores"
+            className=" w-full input input-bordered w-full "
+            value={name as string}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+      </div>
 
-      <label htmlFor="year-of-birth">Year of Birth:</label>
-      <input
-        required
-        className="bg-base-300 ml-4"
-        type="text"
-        id="year-of-birth"
-        name="year-of-birth"
-        placeholder="Enter your year of birth"
-        value={yearOfBirth as string}
-        onChange={(e) => setYearOfBirth(e.target.value)}
-      />
-      <br />
-      <br />
-
-      <label htmlFor="Country">Country:</label>
-      <select
-        value={country as string}
-        onChange={(e) => setCountry(e.target.value)}
-        className="bg-base-300 ml-2 cursor-pointer"
-        id="country"
-        name="country"
-      >
-        {countries.map((country, index) => (
-          <option
-            className="bg-base-300 cursor-pointer"
-            key={index}
-            value={country.code as string}
+      <div className="col-span-full sm:col-span-4 py-4">
+        <label htmlFor="address" className="block text-sm font-medium ">
+          Address
+        </label>
+        <div className="mt-1">
+          {address ? (
+            <span className="ml-4">{address}</span>
+          ) : (
+            <span className="ml-4 text-warning">
+              Please connect your wallet.
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="col-span-full sm:col-span-4 py-4">
+        <label htmlFor="yearOfBirth" className="block text-sm font-medium ">
+          Year of Birth:
+        </label>
+        <div className="mt-1">
+          <input
+            required
+            type="number"
+            id="name"
+            name="name"
+            className=" w-full input input-bordered w-full "
+            placeholder="Enter annual income"
+            value={yearOfBirth as string}
+            onChange={(e) => setYearOfBirth(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="col-span-full sm:col-span-4 py-4">
+        <label htmlFor="address" className="block text-sm font-medium ">
+          Country:
+        </label>
+        <div className="mt-1">
+          <select
+            value={country as string}
+            onChange={(e) => setCountry(e.target.value)}
+            className="select select-bordered w-full max-w-xs"
+            id="country"
+            name="country"
           >
-            {country.name}
-          </option>
-        ))}
-      </select>
-      <br />
-      <br />
+            {countries.map((country, index) => (
+              <option
+                className="cursor-pointer"
+                key={index}
+                value={country.code as string}
+              >
+                {country.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <hr className="w-full border-t border-base-100 mt-4 mb-4" />
       <h2 className="font-bold mt-16 text-xl mb-4">Credit Score:</h2>
-      <label htmlFor="annual-income">Annual income:</label>
-      <input
-        required
-        className="bg-base-300 ml-4"
-        type="text"
-        id="annual-income"
-        name="annual-income"
-        placeholder="Enter you annual income"
-        value={annualIncome as string}
-        onChange={(e) => setAnnualIncome(e.target.value)}
-      />
-      <br />
-      <br />
+      <div className="col-span-full sm:col-span-4 py-4">
+        <label htmlFor="anualIncome" className="block text-sm font-medium ">
+          Annual income:
+        </label>
+        <div className="mt-1">
+          <input
+            required
+            type="number"
+            id="name"
+            name="name"
+            className=" w-full input input-bordered w-full "
+            placeholder="Enter annual income"
+            value={annualIncome as string}
+            onChange={(e) => setAnnualIncome(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="col-span-full sm:col-span-4 py-4">
+        <label
+          htmlFor="monthlyInhandSalary"
+          className="block text-sm font-medium "
+        >
+          Monthly inhand salary:
+        </label>
+        <div className="mt-1">
+          <input
+            required
+            type="number"
+            id="salary"
+            name="salary"
+            autoComplete="10000$"
+            placeholder="Enter monthly salary"
+            className=" w-full input input-bordered w-full "
+            value={salary as string}
+            onChange={(e) => setSalary(e.target.value)}
+          />
+        </div>
+      </div>
 
-      <label htmlFor="salary">Monthly inhand salary:</label>
-      <input
-        required
-        className="bg-base-300 ml-4"
-        type="text"
-        id="salary"
-        name="salary"
-        placeholder="Enter your year of birth"
-        value={salary as string}
-        onChange={(e) => setSalary(e.target.value)}
-      />
-      <br />
-      <br />
+      <div className="col-span-full sm:col-span-4 py-4">
+        <label
+          htmlFor="monthlyInhandSalary"
+          className="block text-sm font-medium "
+        >
+          Number of bank accounts:
+        </label>
+        <div className="mt-1">
+          <input
+            required
+            type="number"
+            id="salary"
+            name="salary"
+            autoComplete="1"
+            placeholder="Enter number of bank accounts"
+            className=" w-full input input-bordered w-full "
+            value={bankAccounts as string}
+            onChange={(e) => setBankAccounts(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="col-span-full sm:col-span-4 py-4">
+        <label htmlFor="creditcards" className="block text-sm font-medium ">
+          Number of credit cards:
+        </label>
+        <div className="mt-1">
+          <input
+            required
+            type="number"
+            id="salary"
+            name="salary"
+            autoComplete="1"
+            placeholder="Enter how many credit cards you own"
+            className=" w-full input input-bordered w-full "
+            value={creditCards as string}
+            onChange={(e) => setCreditCards(e.target.value)}
+          />
+        </div>
+      </div>
 
-      <label htmlFor="bank-accounts">Number of bank accounts:</label>
-      <input
-        required
-        className="bg-base-300 ml-4"
-        type="text"
-        id="bank-accounts"
-        name="bank-accounts"
-        placeholder="Enter how many bank accounts you own"
-        value={bankAccounts as string}
-        onChange={(e) => setBankAccounts(e.target.value)}
-      />
-      <br />
-      <br />
+      <div className="col-span-full sm:col-span-4 py-4">
+        <label htmlFor="creditcards" className="block text-sm font-medium ">
+          Number of Loans:
+        </label>
+        <div className="mt-1">
+          <input
+            required
+            type="number"
+            id="salary"
+            name="salary"
+            autoComplete="1"
+            placeholder="Enter how many loans you own"
+            className=" w-full input input-bordered w-full "
+            value={loans as string}
+            onChange={(e) => setLoans(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="col-span-full sm:col-span-4 py-4">
+        <label htmlFor="creditcards" className="block text-sm font-medium ">
+          Days of delay from due date:
+        </label>
+        <div className="mt-1">
+          <input
+            required
+            type="number"
+            id="salary"
+            name="salary"
+            autoComplete="1"
+            placeholder="Enter number of days of delay from due date"
+            className=" w-full input input-bordered w-full "
+            value={delay as string}
+            onChange={(e) => setDelay(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="col-span-full sm:col-span-4 py-4">
+        <label htmlFor="creditcards" className="block text-sm font-medium ">
+          Number of delayed payments:
+        </label>
+        <div className="mt-1">
+          <input
+            required
+            type="number"
+            id="salary"
+            name="salary"
+            autoComplete="1"
+            placeholder="Enter Number of delayed payments"
+            className=" w-full input input-bordered w-full "
+            value={delayedPayments as string}
+            onChange={(e) => setDelayedPayments(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="col-span-full sm:col-span-4 py-4">
+        <label htmlFor="creditcards" className="block text-sm font-medium ">
+          Credit mix:
+        </label>
+        <div className="mt-1">
+          <input
+            required
+            type="number"
+            id="salary"
+            name="salary"
+            autoComplete="1"
+            placeholder="Enter Credit mix"
+            className=" w-full input input-bordered w-full "
+            value={creditMix as string}
+            onChange={(e) => setCreditMix(e.target.value)}
+          />
+        </div>
+      </div>
 
-      <label htmlFor="credit-cards">Number of credit cards:</label>
-      <input
-        required
-        className="bg-base-300 ml-4"
-        type="text"
-        id="credit-cards"
-        name="credit-cards"
-        placeholder="Enter how many credit cards you own"
-        value={creditCards as string}
-        onChange={(e) => setCreditCards(e.target.value)}
-      />
-      <br />
-      <br />
+      <div className="col-span-full sm:col-span-4 py-4">
+        <label htmlFor="creditcards" className="block text-sm font-medium ">
+          Outstanding debt:
+        </label>
+        <div className="mt-1">
+          <input
+            required
+            type="number"
+            id="debt"
+            name="debt"
+            autoComplete="1"
+            className=" w-full input input-bordered w-full "
+            placeholder="Enter your outstanding debt"
+            value={outstandingDebt as string}
+            onChange={(e) => setOutstandingDebt(e.target.value)}
+          />
+        </div>
+      </div>
 
-      <label htmlFor="loans">Number of loans:</label>
-      <input
-        required
-        className="bg-base-300 ml-4"
-        type="text"
-        id="loans"
-        name="loans"
-        placeholder="Enter how many loans you own"
-        value={loans as string}
-        onChange={(e) => setLoans(e.target.value)}
-      />
-      <br />
-      <br />
+      <div className="col-span-full sm:col-span-4 py-4">
+        <label htmlFor="creditcards" className="block text-sm font-medium ">
+          Years of credit history:
+        </label>
+        <div className="mt-1">
+          <input
+            required
+            type="number"
+            id="salary"
+            name="salary"
+            autoComplete="1"
+            className=" w-full input input-bordered w-full "
+            placeholder="Enter your years of credit history"
+            value={creditHistory as string}
+            onChange={(e) => setCreditHistory(e.target.value)}
+          />
+        </div>
+      </div>
 
-      <label htmlFor="delay">Days of delay from due date:</label>
-      <input
-        required
-        className="bg-base-300 ml-4"
-        type="text"
-        id="delay"
-        name="delay"
-        placeholder="Enter how much credit cards you own"
-        value={delay as string}
-        onChange={(e) => setDelayedPayments(e.target.value)}
-      />
-      <br />
-      <br />
+      <div className="col-span-full sm:col-span-4 py-4">
+        <label htmlFor="creditcards" className="block text-sm font-medium ">
+          Monthly balance:
+        </label>
+        <div className="mt-1">
+          <input
+            required
+            type="number"
+            id="salary"
+            name="salary"
+            autoComplete="1"
+            className=" w-full input input-bordered w-full "
+            placeholder="Enter your monthly balance"
+            value={monthlyBalance as string}
+            onChange={(e) => setMonthlyBalance(e.target.value)}
+          />
+        </div>
+      </div>
 
-      <label htmlFor="delayed-payments">Number of delayed payments:</label>
-      <input
-        required
-        className="bg-base-300 ml-4"
-        type="text"
-        id="delayed-payments"
-        name="delayed-payments"
-        placeholder="Enter how much credit cards you own"
-        value={delayedPayments as string}
-        onChange={(e) => setDelayedPayments(e.target.value)}
-      />
-      <br />
-      <br />
-
-      <label htmlFor="credit-mix">Credit mix:</label>
-      <input
-        required
-        className="bg-base-300 ml-4"
-        type="text"
-        id="credit-mix"
-        name="credit-mix"
-        placeholder="Enter how much credit cards you own"
-        value={creditMix as string}
-        onChange={(e) => setCreditMix(e.target.value)}
-      />
-      <br />
-      <br />
-
-      <label htmlFor="outstanding-debt">Outstanding debt:</label>
-      <input
-        required
-        className="bg-base-300 ml-4"
-        type="text"
-        id="outstanding-debt"
-        name="outstanding-debt"
-        placeholder="Enter your outstanding debt"
-        value={outstandingDebt as string}
-        onChange={(e) => setOutstandingDebt(e.target.value)}
-      />
-      <br />
-      <br />
-
-      <label htmlFor="credit-history">Years of credit history:</label>
-      <input
-        required
-        className="bg-base-300 ml-4"
-        type="text"
-        id="credit-history"
-        name="credit-history"
-        placeholder="Enter your years of credit history"
-        value={creditHistory as string}
-        onChange={(e) => setCreditHistory(e.target.value)}
-      />
-      <br />
-      <br />
-
-      <label htmlFor="monthly-balance">Monthly balance:</label>
-      <input
-        required
-        className="bg-base-300 ml-4"
-        type="text"
-        id="monthly-balance"
-        name="monthly-balance"
-        placeholder="Enter your monthly balance"
-        value={monthlyBalance as string}
-        onChange={(e) => setMonthlyBalance(e.target.value)}
-      />
-      <br />
       <br />
       {loading && !success && address ? (
         <button
           disabled
-          className="bg-secondary text-primary border rounded-sm px-4"
+          className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
         >
-          Loading...{" "}
+          Loading...
         </button>
       ) : !success && address ? (
         <button
           type="submit"
-          className="bg-secondary text-primary border rounded-sm px-4"
+          className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
         >
-          Submit{" "}
+          Send KYC
         </button>
       ) : (
-        <></>
+        <> Connect Wallet </>
       )}
 
       {success && (
@@ -326,7 +398,7 @@ export const Form: FC<Props> = (props) => {
       )}
 
       {error && (
-        <p className="bg-error p-4 mt-4">
+        <p className="rounded-md bg-error p-4 mt-4">
           It looks like you already passed KYC, you don't need to do it again
         </p>
       )}

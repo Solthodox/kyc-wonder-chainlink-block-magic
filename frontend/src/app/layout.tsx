@@ -1,40 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import '../styles/global.css'
-import '@rainbow-me/rainbowkit/styles.css'
-import classNames from 'classnames'
-import { type Metadata } from 'next'
-import { Hind_Siliguri } from 'next/font/google'
-import { type ReactNode } from 'react'
-import Providers from './providers'
-import { Header, Footer } from './components'
-
-// Load the Hind Siliguri font with specified settings
-const hindSiliguri = Hind_Siliguri({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  display: 'swap',
-  preload: true,
-  variable: '--font-hind-siliguri'
-})
+import "../styles/global.css";
+import "@rainbow-me/rainbowkit/styles.css";
+import { type Metadata } from "next";
+import { type ReactNode } from "react";
+import Providers from "./providers";
+import { Header, Footer } from "./components";
 
 // Metadata for the application
 export const metadata: Metadata = {
-  title: 'KycWonder',
-  description: '',
+  title: "KycWonder",
+  description: "",
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico'
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
   },
   viewport: {
-    width: 'device-width',
+    width: "device-width",
     initialScale: 1,
-    maximumScale: 5
-  }
-}
+    maximumScale: 5,
+  },
+};
 
 // Props interface for RootLayout
 interface Props {
-  children: ReactNode
+  children: ReactNode;
 }
 
 /**
@@ -44,19 +33,13 @@ interface Props {
  * @returns The JSX for the root layout.
  */
 export default function RootLayout(props: Props): JSX.Element {
-  const { children } = props
+  const { children } = props;
 
   return (
     <html
       lang="en"
-      data-theme="kyc-wonder"
-      dir="ltr"
-      className={classNames('scroll-p-4 scroll-smooth bg-black md:scroll-p-6', [
-        hindSiliguri.variable
-      ])}
-      style={{
-        ['--mobile-navbar-height' as any]: '56px'
-      }}
+      className={"h-full bg-gray-100  scroll-p-4 scroll-smooth  md:scroll-p-6"}
+      data-theme="light"
     >
       <head>
         {/* Charset do not currently have built-in support, read more here: https://nextjs.org/docs/api-reference/metadata#unsupported-metadata */}
@@ -65,13 +48,18 @@ export default function RootLayout(props: Props): JSX.Element {
 
       <body className="h-full min-h-full">
         <Providers>
-          <main className="mx-auto max-w-screen-md">
-            <Header className="sticky top-0" />
-            {children}
-            <Footer />
+          <Header />
+
+          <main className="-mt-32">
+            <div className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+              <div className="rounded-lg bg-white px-5 py-6 shadow sm:px-6">
+                {children}
+              </div>
+            </div>
           </main>
+          {/* <Footer /> */}
         </Providers>
       </body>
     </html>
-  )
+  );
 }

@@ -51,6 +51,8 @@ function usePostKycData<ErrorType = AxiosError>(url: string) {
       outstandingDebt,
       salary,
     } = postData;
+
+    console.log(postData);
     setError(null);
 
     try {

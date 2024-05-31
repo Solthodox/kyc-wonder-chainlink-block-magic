@@ -1,18 +1,18 @@
-'use client'
+"use client";
 // Import necessary providers for wallet connection, data fetching, and UI elements
-import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit'
-import { ReactNode } from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { WagmiProvider } from 'wagmi'
-import { config } from './config' // Import Wagmi configuration
+import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { ReactNode } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { WagmiProvider } from "wagmi";
+import { config } from "./config"; // Import Wagmi configuration
 
 // Interface for child components
 interface ProvidersProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 // Create a new QueryClient instance for data fetching
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
 /**
  * Component responsible for wrapping the application with necessary providers.
@@ -21,7 +21,7 @@ const queryClient = new QueryClient()
  * @returns The JSX for wrapping the application with providers.
  */
 const Providers = (props: ProvidersProps): JSX.Element => {
-  const { children } = props
+  const { children } = props;
 
   // Wrap the application with Wagmi provider for wallet interaction (uses config)
   return (
@@ -31,17 +31,13 @@ const Providers = (props: ProvidersProps): JSX.Element => {
         {/* RainbowKit provider for wallet connection UI with dark theme configuration */}
         <RainbowKitProvider
           showRecentTransactions={true} // Enable displaying recent transactions
-          theme={darkTheme({
-            accentColor: '#24252B', // Set accent color
-            borderRadius: 'none' // Remove rounded corners
-          })}
         >
           {/* Pass children components to be wrapped by the providers */}
           {children}
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
-  )
-}
+  );
+};
 
-export default Providers
+export default Providers;

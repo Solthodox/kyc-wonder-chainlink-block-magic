@@ -1,9 +1,9 @@
-import { Form } from '../components'
+import { Form } from "../components";
 
 export default function Page(): JSX.Element {
   return (
-    <section className="max-h-full min-w-full bg-base-300 p-16 overflow-y-auto">
+    <section className="max-h-full min-w-full p-16 overflow-y-auto">
       <Form />
     </section>
-  )
+  );
 }

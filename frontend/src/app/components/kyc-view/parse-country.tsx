@@ -250,6 +250,6 @@ const numericCodeToIso3166Alpha3Map: Record<number, string> = {
   716: "ZWE",
 };
 
-export function parseCountry(country: number): string {
+export function parseCountry(country: any): string {
   return numericCodeToIso3166Alpha3Map[country.toString()];
 }

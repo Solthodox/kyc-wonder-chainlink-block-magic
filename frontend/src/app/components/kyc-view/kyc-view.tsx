@@ -51,7 +51,7 @@ export const KycView: FC<Props> = (props) => {
     if (identities) {
       // Link the address to the main address in the bakcend
       postAddress({
-        mainAddress: identities[0],
+        mainAddress: identities[0].address,
         newAddress: newIdentity,
       });
     }
@@ -137,7 +137,7 @@ export const KycView: FC<Props> = (props) => {
               {identities?.map((identity: { address: string }, index: Key) => (
                 <AddressKycStatus
                   key={index}
-                  mainAddress={identities[0]}
+                  mainAddress={identities[0].address as `0x${string}`}
                   address={identity.address as `0x${string}`}
                   permission={index === 0 ? "Admin" : "Secondary"}
                 />

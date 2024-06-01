@@ -26,12 +26,12 @@ contract BasicMessageSender  {
     function _send(
         uint64 destinationChainSelector,
         address receiver,
-        uint256 messageText,
+        uint256 messageRaw,
         PayFeesIn payFeesIn
     ) internal returns (bytes32 messageId) {
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(receiver),
-            data: abi.encode(messageText),
+            data: abi.encode(messageRaw),
             tokenAmounts: new Client.EVMTokenAmount[](0),
             extraArgs: "",
             feeToken: payFeesIn == PayFeesIn.LINK ? link : address(0)

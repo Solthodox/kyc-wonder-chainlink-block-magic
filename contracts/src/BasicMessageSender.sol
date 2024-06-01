@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-
 import {LinkTokenInterface} from "@chainlink/v0.8/shared/interfaces/LinkTokenInterface.sol";
 import {IRouterClient} from "@chainlink-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 import {Client} from "@chainlink-ccip/src/v0.8/ccip/libraries/Client.sol";

@@ -6,9 +6,9 @@ import {FunctionsRequest} from "@chainlink/v0.8/functions/v1_0_0/libraries/Funct
 
 import {LibString} from "solady/utils/LibString.sol";
 import {Ownable} from 'solady/auth/Ownable.sol';
-import {DataTypes} from "src/types/DataTypes.sol";
-import {IERC677} from "src/interfaces/IERC677.sol";
-import {KycDataMapping} from "src/libraries/KycDataMapping.sol";
+import {DataTypes} from "./types/DataTypes.sol";
+import {IERC677} from "./interfaces/IERC677.sol";
+import {KycDataMapping} from "./libraries/KycDataMapping.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {BasicMessageSender} from './BasicMessageSender.sol';
 /// @title KycAggregator
@@ -98,6 +98,7 @@ contract KycAggregator is FunctionsClient, BasicMessageSender, Ownable {
         require(kycData[account].data != 0, 'NO_DATA');
         _send(_chainId, oracle, kycData[account].data, PayFeesIn.Native);
     }
+
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                      API REQUESTS                          */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/

@@ -1,53 +1,49 @@
 import { Hono } from 'hono';
 import { Web3 } from '../services/ethereum';
-import { ArgosProvider } from '../providers/argos/argosProvider';
-import { getNumericCodeFromAlpha3 } from '../utils/iso3166';
 import { Database } from '../services';
-import { Env } from '../interfaces/env';
-import { cors } from 'hono/cors'
+import { Env } from '../types/sharedTypes';
+import { authMiddleware } from '../middleware/authMiddleware';
+import { zValidator } from '@hono/zod-validator';
+import { z } from 'zod';
 
 const kyc = new Hono<{ Bindings: Env }>();
-kyc.use('/', cors());
 
-kyc.get('/:address/:providerId{[0-9]+}', async (c) => {
-    const address = c.req.param('address');
+const params = z.object({
+    address: 
+        z.string().regex(new RegExp(/^0x[0-9A-Fa-f]{40}$/), 
+        { message: 'Address must be a valid Ethereum address' }
+    ),
+    providerId: 
+        z.string().regex(new RegExp(/^[0-9]+$/), 
+        { message: 'Provider ID must be a number' }
+    ),
+});
+
+kyc.get('/:address/:providerId{[0-9]+}', 
+    authMiddleware, 
+    zValidator('param', params),
+    async (c) => {
+    const address = c.req.param('address').toLowerCase();
     const providerId = c.req.param('providerId');
 
     const envr: Env = c.env;
     const database = new Database(envr);
-    const submissionId = await database.getSubmissionIdByAddressAndProvider(
-        address,
-        Number(providerId)
-    );
 
-    if (submissionId.length > 0) {
-        const argosProvider = new ArgosProvider(envr.ARGOS_API_KEY);
-        try {
-            const kycData = await argosProvider.fetchKycData(
-                submissionId
-            );
-            const web3 = new Web3(envr);
-            const isAdult = isOverEighteenYearsOld(kycData.yearOfBirth);
-            const countryCode = getNumericCodeFromAlpha3(kycData.countryCode);
-
-            const parsedData = await web3.parseData(
-                kycData.yearOfBirth,
-                isAdult,
-                countryCode as number,
-                0
-            );
-            return c.json({ parsedData });
-        } catch (error) {
-            return c.json({ success: false, error: error });
-        }
+    try {
+        const kycData = await database.getRelationByAddress(address);
+        const web3 = new Web3(envr);
+        const isAdult = kycData.isAdult === 1 ? true : false;
+        const parsedData = await web3.parseData(
+            kycData.yearOfBirth,
+            isAdult,
+            kycData.countryCode,
+            kycData.creditScore
+        );
+        return c.json({ parsedData });
     }
-
-    return c.text(`The address: ${address} does not have a submission id.`);
+    catch (error) {
+        return c.json({ success: false, error: "Failed to get KYC" })
+    }
 });
 
-function isOverEighteenYearsOld(birthYear: number): boolean {
-    const currentYear = new Date().getFullYear();
-    const age = currentYear - birthYear;
-    return age >= 18;
-}
 export default kyc;

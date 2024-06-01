@@ -3,7 +3,6 @@ compatibility_date = "2023-12-01"
 workers_dev = true
 
 [vars]
-ARGOS_API_KEY = "${ARGOS_API_KEY}"
 RPC_URL = "${RPC_URL}"
 AUTH_API_KEY = "${AUTH_API_KEY}"
 FRONT_API_KEY = "${FRONT_API_KEY}"

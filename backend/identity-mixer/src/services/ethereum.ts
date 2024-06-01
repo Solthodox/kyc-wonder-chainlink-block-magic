@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { Env } from '../interfaces/env';
+import { Env } from '../types/sharedTypes';
 
 import KycAggregatorABI from '../abis/KycAggregator.json';
 

@@ -72,9 +72,9 @@ function usePostKycData<ErrorType = AxiosError>(url: string) {
           num_Loans: loans,
           delay_From_Due_Date: delay,
           num_Delayed_Payments: delayedPayments,
-          credit_Mix: creditMix,
+          credit_Mix: 1,
           outstanding_Debt: outstandingDebt,
-          credit_History_Year: creditHistory,
+          credit_History_Year: 2,
           monthly_Balance: monthlyBalance,
         },
         {
@@ -85,6 +85,7 @@ function usePostKycData<ErrorType = AxiosError>(url: string) {
         }
       );
       console.log(response);
+      localStorage.setItem("kycPassed", JSON.stringify(true));
       setSuccess("200"); // Success state as string
     } catch (error) {
       console.error(error);

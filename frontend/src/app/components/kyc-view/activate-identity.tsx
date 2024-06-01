@@ -59,12 +59,12 @@ export const ActivateIdentity: FC<Props> = (props) => {
     <>
       <button
         onClick={() => kycModal?.showModal()}
-        className="bg-secondary text-primary border rounded-sm px-4"
+        className="bg-primary text-white py-1 border px-4"
       >
         Activate
       </button>
       <dialog id="kyc_modal" className="modal">
-        <div className="modal-box text-base-300">
+        <div className="modal-box text-black">
           <h3 className="font-bold text-lg">{address}</h3>
           <p className="py-4">
             Please switch to the selected address to execute the transaction.
@@ -76,7 +76,14 @@ export const ActivateIdentity: FC<Props> = (props) => {
             <div className="bg-error p-2">Opps! Something went wrong</div>
           )}
           <div className="modal-action">
-            <button disabled={loading} onClick={handleClick} className="btn">
+            {loading && (
+              <span className="loading loading-ring loading-xs"></span>
+            )}
+            <button
+              disabled={loading}
+              onClick={handleClick}
+              className="btn bg-purple-300 hover:bg-purple-200"
+            >
               Activate
             </button>
             <form method="dialog">

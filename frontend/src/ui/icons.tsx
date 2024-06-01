@@ -1,6 +1,6 @@
-import { forwardRef, type ComponentPropsWithRef } from 'react'
+import { forwardRef, type ComponentPropsWithRef } from "react";
 
-interface Props extends ComponentPropsWithRef<'svg'> {}
+interface Props extends ComponentPropsWithRef<"svg"> {}
 
 export const FingerPrintIcon = forwardRef<SVGSVGElement, Props>(
   (props, ref) => {
@@ -21,9 +21,9 @@ export const FingerPrintIcon = forwardRef<SVGSVGElement, Props>(
           />
         </g>
       </svg>
-    )
+    );
   }
-)
+);
 
 export const WarningIcon = forwardRef<SVGSVGElement, Props>((props, ref) => {
   return (
@@ -40,5 +40,28 @@ export const WarningIcon = forwardRef<SVGSVGElement, Props>((props, ref) => {
         <path d="M1 21h22L12 2zm12-3h-2v-2h2zm0-4h-2v-4h2z" fill="inherit" />
       </g>
     </svg>
-  )
-})
+  );
+});
+
+export const SuccessIconFill = forwardRef<SVGSVGElement, Props>(
+  (props, ref) => {
+    return (
+      <svg
+        {...props}
+        ref={ref}
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="black"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8z"
+            fill="inherit"
+          />
+        </g>
+      </svg>
+    );
+  }
+);

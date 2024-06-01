@@ -72,7 +72,7 @@ export const KycView: FC<Props> = (props) => {
         {/* Success message */}
         {success && (
           <>
-            <div className="card card-side bg-base-300 shadow-xl">
+            <div className="card card-side shadow-xl">
               <figure>
                 <img src="https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.jpg" />
               </figure>
@@ -144,13 +144,15 @@ export const KycView: FC<Props> = (props) => {
               ))}
             </tbody>
           </table>
-          <button className="mt-4 bg-secondary text-primary border rounded-sm px-4 py-2">
+          <button className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             New identity
           </button>
         </>
       )}
       {error && (
-        <div className="bg-error p-4">Could not fetch any identities</div>
+        <div className="rounded-md bg-error p-4">
+          Could not fetch any identities
+        </div>
       )}
     </div>
   );

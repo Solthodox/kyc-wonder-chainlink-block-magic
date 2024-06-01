@@ -40,10 +40,6 @@ export const KycView: FC<Props> = (props) => {
     args: [address],
   });
 
-  const addAddressModal = document.getElementById(
-    "add_address"
-  ) as HTMLDialogElement | null;
-
   const [newIdentity, setNewIdentity] = useState<string>("");
 
   const { postAddress } = usePostKycAddress(baseApiUrl);
@@ -164,7 +160,7 @@ export const KycView: FC<Props> = (props) => {
             </tbody>
           </table>
           <button
-            onClick={() => addAddressModal?.showModal()}
+            onClick={() => document.getElementById("add_address")?.showModal()}
             className=" my-8 text-white py-2 bg-primary text-lg border rounded-sm px-4"
           >
             New Identity

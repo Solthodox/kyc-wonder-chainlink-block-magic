@@ -18,20 +18,20 @@ export interface IdentitiesType {
 }
 export interface KycData {
   name: string;
-  yearOfBirth: string;
+  yearOfBirth: number;
   address: string;
   country: string;
-  annualIncome: string;
-  salary: string;
-  bankAccounts: string;
-  creditCards: string;
-  loans: string;
-  delay: string;
-  delayedPayments: string;
-  creditMix: string;
-  outstandingDebt: string;
-  creditHistory: string;
-  monthlyBalance: string;
+  annualIncome: number;
+  salary: number;
+  bankAccounts: number;
+  creditCards: number;
+  loans: number;
+  delay: number;
+  delayedPayments: number;
+  creditMix: number;
+  outstandingDebt: number;
+  creditHistory: number;
+  monthlyBalance: number;
 }
 export interface AddressData {
   mainAddress: string;

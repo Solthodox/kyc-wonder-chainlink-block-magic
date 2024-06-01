@@ -48,20 +48,20 @@ export const Form: FC<Props> = (props) => {
     // Simulate form submission here (e.g., send data to backend)
     postData({
       name: name as string,
-      yearOfBirth: yearOfBirth as string,
+      yearOfBirth: Number(yearOfBirth) as number,
       address: address as `0x${string}`,
       country: country as string,
-      annualIncome: annualIncome as string,
-      salary: salary as string,
-      bankAccounts: bankAccounts as string,
-      creditCards: creditCards as string,
-      loans: loans as string,
-      delay: delay as string,
-      delayedPayments: delayedPayments as string,
-      creditMix: creditMix as string,
-      outstandingDebt: outstandingDebt as string,
-      creditHistory: creditHistory as string,
-      monthlyBalance: monthlyBalance as string,
+      annualIncome: Number(annualIncome) as number,
+      salary: Number(salary) as number,
+      bankAccounts: Number(bankAccounts) as number,
+      creditCards: Number(creditCards) as number,
+      loans: Number(loans) as number,
+      delay: Number(delay) as number,
+      delayedPayments: Number(delayedPayments) as number,
+      creditMix: Number(creditMix) as number,
+      outstandingDebt: Number(outstandingDebt) as number,
+      creditHistory: Number(creditHistory) as number,
+      monthlyBalance: Number(monthlyBalance) as number,
     });
 
     // setName(null);
@@ -387,7 +387,11 @@ export const Form: FC<Props> = (props) => {
       ) : (
         <> Connect Wallet </>
       )}
-
+      {loading && (
+        <span className="loading loading-ring loading-xs">
+          Calling the identity mixer API...
+        </span>
+      )}
       {success && (
         <p className="bg-success p-4 mt-4">
           You have been successfully KYCd! Go check your{" "}
@@ -396,7 +400,6 @@ export const Form: FC<Props> = (props) => {
           </Link>
         </p>
       )}
-
       {error && (
         <p className="rounded-md bg-error p-4 mt-4">
           It looks like you already passed KYC, you don't need to do it again

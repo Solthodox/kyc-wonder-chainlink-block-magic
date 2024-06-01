@@ -7,7 +7,7 @@ from fastapi import FastAPI, Request, Depends,Form
 app = FastAPI()
 
 
-@app.get('/credit')
+@app.post('/credit')
 async def predict(request: Request, 
                   Annual_Income:float=Form(...),
                   Monthly_Inhand_Salary:float=Form(...),

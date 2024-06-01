@@ -71,8 +71,12 @@ export const ActivateIdentity: FC<Props> = (props) => {
             You will now push the new identity to the KYC oracle. This will take
             a few seconds as the oracle needs to fetch your KYC from the API
           </p>
+          {loading && <span className="loading loading-ring loading-xs"></span>}
+          {error && (
+            <div className="bg-error p-2">Opps! Something went wrong</div>
+          )}
           <div className="modal-action">
-            <button onClick={handleClick} className="btn">
+            <button disabled={loading} onClick={handleClick} className="btn">
               Activate
             </button>
             <form method="dialog">

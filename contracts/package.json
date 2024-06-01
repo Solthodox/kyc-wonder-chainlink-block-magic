@@ -14,7 +14,10 @@
   "devDependencies": {
     "@defi-wonderland/natspec-smells": "^1.0.3",
     "prettier": "^2.8.3",
-    "prettier-plugin-solidity": "^1.1.1"
+    "prettier-plugin-solidity": "^1.1.1",
+    "@chainlink/contracts": "^0.6.1",
+    "@chainlink/contracts-ccip": "^1.4.0",
+    "@chainlink/local": "github:smartcontractkit/chainlink-local"
   },
   "author": "",
   "license": "ISC"

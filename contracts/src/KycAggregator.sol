@@ -1,17 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {FunctionsClient} from "chainlink/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
-import {FunctionsRequest} from "chainlink/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
+import {FunctionsClient} from "@chainlink/v0.8/functions/v1_0_0/FunctionsClient.sol";
+import {FunctionsRequest} from "@chainlink/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
+
 import {LibString} from "solady/utils/LibString.sol";
+import {Ownable} from 'solady/auth/Ownable.sol';
 import {DataTypes} from "src/types/DataTypes.sol";
 import {IERC677} from "src/interfaces/IERC677.sol";
 import {KycDataMapping} from "src/libraries/KycDataMapping.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
-
+import {BasicMessageSender} from './BasicMessageSender.sol';
 /// @title KycAggregator
 /// @notice On-chain anonymous KYC oracle
-contract KycAggregator is FunctionsClient {
+contract KycAggregator is FunctionsClient, BasicMessageSender, Ownable {
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                         LIB                                */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
@@ -21,10 +23,7 @@ contract KycAggregator is FunctionsClient {
     using KycDataMapping for DataTypes.UserKycMap;
     using SafeTransferLib for address;
 
-    /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
-    /*                         ERRORS                             */
-    /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
-    error Unauthorized();
+     
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                         EVENTS                             */
@@ -75,15 +74,30 @@ contract KycAggregator is FunctionsClient {
     mapping(address => DataTypes.UserKycMap) public kycData;
     /// @notice Operator permissions to request KYC data
     mapping(address => mapping(address => bool)) public isApprovedOperator;
+    /// @notice Multichain mapping
+    mapping(uint64 => address) public multichainOracles;
 
     constructor(
         uint64 _subscriptionId,
-        address _treasury
-    ) FunctionsClient(FUNCTIONS_ROUTER) {
+        address _treasury,
+        address _router,
+        address _link
+    ) FunctionsClient(FUNCTIONS_ROUTER) BasicMessageSender(_router, _link) {
         subscriptionId = _subscriptionId;
         treasury = _treasury;
     }
 
+
+    function addNewChain(uint64 _chainId, address oracle) external onlyOwner {
+        multichainOracles[_chainId] = oracle;
+    }
+
+    function broadcastKYC(uint64 _chainId,  address account) external payable{
+        address oracle = multichainOracles[_chainId];
+        require(oracle != address(0), 'UNSOPORTED_CHAIN');
+        require(kycData[account].data != 0, 'NO_DATA');
+        _send(_chainId, oracle, kycData[account].data, PayFeesIn.Native);
+    }
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                      API REQUESTS                          */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/

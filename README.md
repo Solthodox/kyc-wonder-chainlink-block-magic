@@ -88,12 +88,12 @@ However, storing KYC data on-chain presents challenges, particularly around priv
 
 ## Deployment addresses
 
-| NAME                | URL                                                                                           |
-| ------------------- | --------------------------------------------------------------------------------------------- |
-| Kyc Oracle          | https://sepolia-optimism.etherscan.io/address/0x068251617f0c1851a75c109f3d114462a3a3c2f7#code |
-| Frontend            | https://sepolia-optimism.etherscan.io/address/0x068251617f0c1851a75c109f3d114462a3a3c2f7#code |
-| Identity Mixer      | https://sepolia-optimism.etherscan.io/address/0x068251617f0c1851a75c109f3d114462a3a3c2f7#code |
-| Credit Score $odel$ | https://sepolia-optimism.etherscan.io/address/0x068251617f0c1851a75c109f3d114462a3a3c2f7#code |
+| NAME               | URL                                                                                      |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| Kyc Oracle         | https://sepolia-optimism.etherscan.io/address/0x068251617f0c1851a75c109f3d114462a3a3c2f7 |
+| Frontend           | https://kyc-wonder-chainlink-block-magic.vercel.app/                                     |
+| Identity Mixer     | https://kycworker.kycwonder.workers.dev"                                                 |
+| Credit Score Model | http://13.49.227.187/                                                                    |
 
 ## License
 

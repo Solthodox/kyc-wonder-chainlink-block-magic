@@ -1,7 +1,7 @@
 "use client";
 
 import { type ComponentPropsWithoutRef, type FC } from "react";
-import { useReadContract, useWriteContract } from "wagmi";
+import { useWriteContract } from "wagmi";
 import {
   baseApiUrl,
   donHostedSecretsSlot,
@@ -9,7 +9,6 @@ import {
   IKycAggregatorABI,
   kycAggregatorAddress,
 } from "../../../../statics";
-import { type LatestKycData } from "@/types";
 import usePostKycAddress from "@/app/hooks/use-post-kyc-address";
 
 interface Props extends ComponentPropsWithoutRef<any> {
@@ -29,10 +28,6 @@ export const ActivateIdentity: FC<Props> = (props) => {
   const { mainAddress, address } = props;
   const { success, error, loading, postAddress } =
     usePostKycAddress(baseApiUrl);
-
-  const kycModal = document.getElementById(
-    "kyc_modal"
-  ) as HTMLDialogElement | null;
 
   /**
    * Handle form submission to request KYC data activation.
@@ -58,13 +53,13 @@ export const ActivateIdentity: FC<Props> = (props) => {
   return (
     <>
       <button
-        onClick={() => kycModal?.showModal()}
-        className="bg-secondary text-primary border rounded-sm px-4"
+        onClick={() => document.getElementById("kyc_modal")?.showModal()}
+        className="bg-primary text-white py-1 border px-4"
       >
         Activate
       </button>
       <dialog id="kyc_modal" className="modal">
-        <div className="modal-box text-base-300">
+        <div className="modal-box text-black">
           <h3 className="font-bold text-lg">{address}</h3>
           <p className="py-4">
             Please switch to the selected address to execute the transaction.
@@ -76,7 +71,14 @@ export const ActivateIdentity: FC<Props> = (props) => {
             <div className="bg-error p-2">Opps! Something went wrong</div>
           )}
           <div className="modal-action">
-            <button disabled={loading} onClick={handleClick} className="btn">
+            {loading && (
+              <span className="loading loading-ring loading-xs"></span>
+            )}
+            <button
+              disabled={loading}
+              onClick={handleClick}
+              className="btn bg-purple-300 hover:bg-purple-200"
+            >
               Activate
             </button>
             <form method="dialog">

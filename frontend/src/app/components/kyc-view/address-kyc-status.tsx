@@ -38,11 +38,6 @@ export const AddressKycStatus: FC<Props> = ({
     <tr>
       {/* Display truncated wallet address */}
       <td>
-        <div className="avatar">
-          <div className="mask mask-squircle w-4 h-4">
-            <img src="https://img.daisyui.com/tailwind-css-component-profile-2@56w.png" />
-          </div>
-        </div>
         {address.slice(0, 4)}...{address.slice(37, 42)}
       </td>
 

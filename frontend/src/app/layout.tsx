@@ -6,21 +6,6 @@ import { type ReactNode } from "react";
 import Providers from "./providers";
 import { Header, Footer } from "./components";
 
-// Metadata for the application
-export const metadata: Metadata = {
-  title: "KycWonder",
-  description: "",
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-  },
-};
-
 // Props interface for RootLayout
 interface Props {
   children: ReactNode;

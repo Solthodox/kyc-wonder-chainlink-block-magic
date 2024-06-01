@@ -1,0 +1,3 @@
+[submodule "contracts/lib/ccip"]
+	path = contracts/lib/ccip
+	url = https://github.com/smartcontractkit/ccip

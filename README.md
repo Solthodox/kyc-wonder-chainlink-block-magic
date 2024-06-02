@@ -97,7 +97,7 @@ We store a very important field in the public KYC data: the credit score. In ord
 
 | NAME               | URL                                                                                      |
 | ------------------ | ---------------------------------------------------------------------------------------- |
-| Kyc Oracle         | https://sepolia-optimism.etherscan.io/address/0x068251617f0c1851a75c109f3d114462a3a3c2f7 |
+| Kyc Oracle         | https://amoy.polygonscan.com/address/0xdBbe87d0097F2B2381d67817EDA8f4E8bd2CCd46          |
 | Frontend           | https://kyc-wonder-chainlink-block-magic.vercel.app/                                     |
 | Identity Mixer     | https://kycworker.kycwonder.workers.dev"                                                 |
 | Credit Score Model | http://13.49.227.187/                                                                    |

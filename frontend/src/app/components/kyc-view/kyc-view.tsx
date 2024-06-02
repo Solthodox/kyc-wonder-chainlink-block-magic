@@ -113,7 +113,7 @@ export const KycView: FC<Props> = (props) => {
                 className="text-blue-500 underline"
                 target="_blank"
                 rel="noopener noreferrer"
-                href={`https://sepolia-optimism.etherscan.io/address/${kycAggregatorAddress}#readContract`}
+                href={`https://amoy.polygonscan.com/address/${kycAggregatorAddress}`}
               >
                 here
               </a>

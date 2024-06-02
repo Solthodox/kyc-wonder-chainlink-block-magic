@@ -13,7 +13,7 @@ import { LatestKycData } from "@/types";
 import { parseCreditScore } from "./parse-credit-score";
 import usePostKycAddress from "@/app/hooks/use-post-kyc-address";
 import { parseCountry } from "./parse-country";
-import { WarningIcon } from "@/ui/icons";
+import { SuccessIconFill, WarningIcon } from "@/ui/icons";
 
 interface Props extends React.ComponentPropsWithoutRef<"div"> {}
 
@@ -42,7 +42,12 @@ export const KycView: FC<Props> = (props) => {
 
   const [newIdentity, setNewIdentity] = useState<string>("");
 
-  const { postAddress } = usePostKycAddress(baseApiUrl);
+  const {
+    success: successPostAddress,
+    error: errorPostAddress,
+    loading: loadingPostAddress,
+    postAddress,
+  } = usePostKycAddress(baseApiUrl);
 
   const handleClick = async (newIdentity: string): Promise<void> => {
     console.log("add identity");
@@ -152,9 +157,11 @@ export const KycView: FC<Props> = (props) => {
               {identities?.map((identity: { address: string }, index: Key) => (
                 <AddressKycStatus
                   key={index}
-                  mainAddress={identities[0].address as `0x${string}`}
                   address={identity.address as `0x${string}`}
                   permission={index === 0 ? "Admin" : "Secondary"}
+                  isConnected={
+                    identity.address.toLowerCase() === address?.toLowerCase()
+                  }
                 />
               ))}
             </tbody>
@@ -172,28 +179,44 @@ export const KycView: FC<Props> = (props) => {
                 Add the address that will be added to the list of identities.
               </p>
               <input
+                className="input w-full"
                 type="text"
                 placeholder="Enter new address"
                 onChange={(e) => {
                   setNewIdentity(e.target.value);
                 }}
               />
-              {loading && (
-                <span className="loading loading-ring loading-xs"></span>
+              {loadingPostAddress === true && (
+                <>
+                  <span className="loading loading-ring loading-xs"></span>
+                  <span>Calling the identity mixer API...</span>
+                </>
               )}
-              {error && (
+
+              {successPostAddress === "200" && (
+                <>
+                  <span className="flex items-center">
+                    Address added to the identity mixer{" "}
+                    <SuccessIconFill className="fill-success ml-2" />
+                  </span>
+                </>
+              )}
+              {errorPostAddress && (
                 <div className="bg-error p-2">Opps! Something went wrong</div>
               )}
+
               <div className="modal-action">
-                <button
-                  disabled={loading}
-                  onClick={() => {
-                    handleClick(newIdentity);
-                  }}
-                  className="btn"
-                >
-                  Add Address
-                </button>
+                {!successPostAddress && (
+                  <button
+                    disabled={loadingPostAddress}
+                    onClick={() => {
+                      handleClick(newIdentity);
+                    }}
+                    className="btn bg-primary text-base-300"
+                  >
+                    Add Address
+                  </button>
+                )}
                 <form method="dialog">
                   <button className="btn">Close</button>
                 </form>

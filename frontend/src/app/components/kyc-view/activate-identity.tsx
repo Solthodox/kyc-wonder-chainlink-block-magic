@@ -1,19 +1,18 @@
 "use client";
 
 import { type ComponentPropsWithoutRef, type FC } from "react";
-import { useWriteContract } from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import {
-  baseApiUrl,
   donHostedSecretsSlot,
   donHostedSecretsVersion,
   IKycAggregatorABI,
   kycAggregatorAddress,
 } from "../../../../statics";
-import usePostKycAddress from "@/app/hooks/use-post-kyc-address";
+import { SuccessIconFill } from "@/ui/icons";
 
 interface Props extends ComponentPropsWithoutRef<any> {
-  mainAddress: `0x${string}`;
-  address: `0x${string}`;
+  connectedAddress: `0x${string}`;
+  isAddressConnected: boolean;
 }
 
 /**
@@ -22,12 +21,15 @@ interface Props extends ComponentPropsWithoutRef<any> {
  *
  * @param props - React component props for a <tr> element.
  */
-export const ActivateIdentity: FC<Props> = (props) => {
+export const ActivateIdentity: FC<Props> = (props: Props) => {
   // Hook to write to the contract, requesting KYC data
-  const { writeContract } = useWriteContract();
-  const { mainAddress, address } = props;
-  const { success, error, loading, postAddress } =
-    usePostKycAddress(baseApiUrl);
+  const { data: hash, isPending, writeContract } = useWriteContract();
+  const { connectedAddress, isAddressConnected } = props;
+
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash,
+    });
 
   /**
    * Handle form submission to request KYC data activation.
@@ -36,17 +38,20 @@ export const ActivateIdentity: FC<Props> = (props) => {
    */
   const handleClick = async (): Promise<void> => {
     console.log("activate");
-    // Link the address to the main address in the bakcend
-    postAddress({
-      mainAddress,
-      newAddress: address,
-    });
+    console.log(isAddressConnected);
+    console.log(connectedAddress);
+
     // Fetch new KYC data on-chain
-    https: writeContract({
+    writeContract({
       address: kycAggregatorAddress as unknown as `0x${string}`,
       abi: IKycAggregatorABI,
       functionName: "requestKycData",
-      args: [donHostedSecretsSlot, donHostedSecretsVersion, address, "1"],
+      args: [
+        donHostedSecretsSlot,
+        donHostedSecretsVersion,
+        connectedAddress,
+        "1",
+      ],
     });
   };
 
@@ -60,27 +65,42 @@ export const ActivateIdentity: FC<Props> = (props) => {
       </button>
       <dialog id="kyc_modal" className="modal">
         <div className="modal-box text-black">
-          <h3 className="font-bold text-lg">{address}</h3>
+          <h3 className="font-bold text-lg">{connectedAddress}</h3>
           <p className="py-4">
-            Please switch to the selected address to execute the transaction.
-            You will now push the new identity to the KYC oracle. This will take
-            a few seconds as the oracle needs to fetch your KYC from the API
+            Please switch to the selected address to execute the transaction to
+            proof the ownership of the address. You will now push the new
+            identity to the KYC oracle. This will take a few seconds as the
+            oracle needs to fetch your KYC from the API
           </p>
-          {loading && <span className="loading loading-ring loading-xs"></span>}
-          {error && (
-            <div className="bg-error p-2">Opps! Something went wrong</div>
+
+          {(isConfirming || isPending) && (
+            <>
+              <span className="loading loading-ring loading-xs"></span>
+              <span>Fetching identity from the oracle...</span>
+            </>
+          )}
+
+          {isConfirmed && (
+            <>
+              <span className="flex items-center">
+                Identity added to the oracle{" "}
+                <SuccessIconFill className="fill-success ml-2" />
+              </span>
+              <span className="font-semibold my-2">
+                Wait a few seconds for the DON to finalize the request{" "}
+              </span>
+            </>
           )}
           <div className="modal-action">
-            {loading && (
-              <span className="loading loading-ring loading-xs"></span>
+            {!isConfirmed && isAddressConnected && (
+              <button
+                disabled={isConfirming || isPending}
+                onClick={handleClick}
+                className="btn bg-primary text-base-300 hover:bg-purple-200"
+              >
+                {isConfirming || isPending ? "Loading..." : "Activate"}
+              </button>
             )}
-            <button
-              disabled={loading}
-              onClick={handleClick}
-              className="btn bg-purple-300 hover:bg-purple-200"
-            >
-              Activate
-            </button>
             <form method="dialog">
               <button className="btn">Close</button>
             </form>

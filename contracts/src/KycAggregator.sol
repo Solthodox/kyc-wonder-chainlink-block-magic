@@ -80,9 +80,8 @@ contract KycAggregator is FunctionsClient, BasicMessageSender, Ownable {
     constructor(
         uint64 _subscriptionId,
         address _treasury,
-        address _router,
-        address _link
-    ) FunctionsClient(FUNCTIONS_ROUTER) BasicMessageSender(_router, _link) {
+        address _ccipRouter
+    ) FunctionsClient(FUNCTIONS_ROUTER) BasicMessageSender(_ccipRouter, address(LINK)) {
         subscriptionId = _subscriptionId;
         treasury = _treasury;
     }

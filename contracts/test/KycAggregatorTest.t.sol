@@ -9,7 +9,7 @@ contract MockKycAggregator is KycAggregator {
     constructor(
         uint64 _subscriptionId,
         address _treasury
-    ) KycAggregator(_subscriptionId, _treasury, address(0), address(0)) {}
+    ) KycAggregator(_subscriptionId, _treasury, address(0)) {}
 
     function fulfill(
         bytes32 requestId,

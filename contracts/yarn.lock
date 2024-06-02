@@ -48,7 +48,8 @@
 
 "@chainlink/local@github:smartcontractkit/chainlink-local":
   version "0.0.0"
-  resolved "git+ssh://git@github.com/smartcontractkit/chainlink-local.git#9ee212e7699c6d67879fe48007c745e513bc6ea7"
+  resolved "git+ssh://git@github.com/smartcontractkit/chainlink-local.git"
+  integrity sha512-oZTzhjQ+z8/9hHxtiQAWcFljFarOl6u17Q05jte+HSrCfMnZm7lRj9EUHcRmCYESSDt22leRtw23/En8deMi+A==
   dependencies:
     "@chainlink/contracts-ccip" "^1.4.0"
 

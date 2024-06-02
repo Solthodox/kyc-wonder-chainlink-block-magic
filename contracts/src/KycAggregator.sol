@@ -41,12 +41,12 @@ contract KycAggregator is FunctionsClient, BasicMessageSender, Ownable {
     uint256 public constant PROTOCOL_FEE = 0.003 ether; // 0.003 link
 
     /// @dev All Chainlink related addresses are hardcoded for Optimism Sepolia
-    IERC677 constant LINK = IERC677(0xE4aB69C077896252FAFBD49EFD26B5D171A32410);
+    IERC677 constant LINK = IERC677(0x0Fd9e8d3aF1aaee056EB9e802c3A762a667b1904);
     address constant FUNCTIONS_ROUTER =
-        0xC17094E3A1348E5C7544D4fF8A36c28f2C6AAE28;
+        0xC22a79eBA640940ABB6dF0f7982cc119578E11De;
     address treasury;
     bytes32 constant donID =
-        0x66756e2d6f7074696d69736d2d7365706f6c69612d3100000000000000000000;
+        0x66756e2d706f6c79676f6e2d616d6f792d310000000000000000000000000000;
 
     /// @dev JS source code, using DON-hosted secrets for safe API calls
     string constant source =

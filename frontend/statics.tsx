@@ -2,9 +2,9 @@ import IKycAggregator from "./abi/IKycAggregator.json";
 
 export const IKycAggregatorABI = IKycAggregator;
 export const kycAggregatorAddress: string =
-  "0xe7e1142e3173737cA2E39999df97CbaE6DcAC54c";
+  "0xdBbe87d0097F2B2381d67817EDA8f4E8bd2CCd46";
 export const donHostedSecretsSlot: string = "0";
-export const donHostedSecretsVersion: string = "1717083137";
+export const donHostedSecretsVersion: string = "1717336917";
 export const baseApiUrl: string = "https://kycworker.kycwonder.workers.dev";
 export const defaultProvider: string = "1";
 export const countries: { code: string; name: string }[] = [

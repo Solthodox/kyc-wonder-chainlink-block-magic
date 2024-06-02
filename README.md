@@ -12,6 +12,8 @@ By implementing KYC on-chain, we can bring the advantages of blockchain technolo
 
 However, storing KYC data on-chain presents challenges, particularly around privacy and data security. KycWonder addresses these issues by storing only non-sensitive KYC fields on-chain and ensuring data homogeneity to protect user privacy. Our Identity-Mixer feature further enhances anonymity by allowing users to link multiple wallet addresses to their KYC data without showing any relationship between those wallets on-chain, making it impossible to distinguish between a completely new kyc person and already kyc-d person that created a new identity.
 
+KycWonder marks a significant advancement in merging traditional finance with decentralized finance by providing an on-chain KYC solution that is both secure and privacy-preserving. This protocol enables institutional investors to confidently enter the DeFi space, knowing that regulatory compliance can be maintained without compromising user anonymity. The integration of credit scores on-chain also opens new avenues for DeFi protocols to innovate and offer more sophisticated financial products, bridging the gap between TradFi and DeFi. By ensuring secure, transparent, and efficient KYC processes, KycWonder is set to revolutionize the financial ecosystem and boost the adoption of decentralized financial services globally.
+
 ## Table of Contents
 
 - [KycWonder](#kycwonder)
@@ -24,8 +26,8 @@ However, storing KYC data on-chain presents challenges, particularly around priv
   - [Usage](#usage)
     - [Passing KYC and Storing Data](#passing-kyc-and-storing-data)
     - [Switching identities](#switching-identities)
-  - [Importance of Credit Score](#importance-of-credit-score)
   - [Security and Privacy](#security-and-privacy)
+  - [Importance of Credit Score](#importance-of-credit-score)
   - [Deployment addresses](#deployment-addresses)
   - [License](#license)
 
@@ -47,7 +49,7 @@ However, storing KYC data on-chain presents challenges, particularly around priv
 
 - `yearOfBirth`: year of birth of the person
 - `isAdult`: true if that person is +18
-- `country`:
+- `country`: country code according to ISO3166 standard
 - `creditScore`: 0,1 or 2 from best to worst
 - `lastUpdatedAt`: timestamp of last API request from the contract
 
@@ -65,26 +67,31 @@ However, storing KYC data on-chain presents challenges, particularly around priv
 ### Passing KYC and Storing Data
 
 1. **Complete KYC**: User completes the KYC process off-chain through an external KYC provider in KycWonder's interface.
-2. **Map KYC Data to Address**: KycWonder backend maps the KYC data to the user's Ethereum address.
+2. **Map KYC Data to Address**: KycWonder backend(identity-mixer) maps the KYC data to the user's Ethereum address.
 3. **Fetch KYC Data On-Chain**: User calls the smart contract function to fetch and store public KYC data on-chain.
 
 ### Switching identities
 
-1. **Link New Address**: User can link a new Ethereum address to their existing KYC data without the need to pass KYC again
-2. **Fetch KYC Data for New Address**: User calls the smart contract function to fetch and store the KYC data for the new address.
+1. **Link New Address**: User can link a new Ethereum address to their existing KYC data without the need to pass KYC again, the old KYC will be linked to the new address.
+2. **Fetch KYC Data for New Address**: User calls the smart contract function to fetch and store the KYC data for the new address, without the need to disclose his previous adress.
+3. **Navigate on chain**: User can now start to use the new address to navigate the defi space with KYC requirements, and switch identities so he does not have a long trackable transactions record.
+
+## Security and Privacy
+
+In order to preserve the anonimity of KYC users it is highly encouraged to switch identity on-chain frequently. No relationship between the new and old identities it's stored on-chain. However, identities could be linked by comparing their KYC datas. That's why we created the so-called identity mixer. The identity mixer stores all the identities and their public KYC data. But this public KYC data has been designed to be very homogeneus so when there are a high number of identities it will be almost impossible to link the new identities with the old ones.
+
+- **Homogeneous Data**: Ensure on-chain KYC data fields are homogenous across users to prevent linking to real identities.
+- **Multiple Addresses**: Allow users to map multiple addresses to their KYC data to enhance anonymity.
+- **Secure Data Fetching**: Utilize Chainlink Functions for secure and reliable off-chain data fetching, using DON hosted secrets.
 
 ## Importance of Credit Score
+
+We store a very important field in the public KYC data: the credit score. In order to predict the credit score we use a ML model.
 
 - **Risk Assessment**: Credit scores provide a reliable measure of a user's creditworthiness, helping lenders assess the risk of lending to a particular user.
 - **Loan Approval**: Higher credit scores can facilitate quicker loan approvals and better interest rates.
 - **Integration with** DeFi: Credit scores can be used in DeFi protocols for issuing loans, setting collateral requirements, and determining interest rates.
 - **TradFi Instrument** Integration: Having credit scores on-chain allows for seamless integration of traditional financial instruments, making the blockchain ecosystem more robust and versatile.
-
-## Security and Privacy
-
-- **Homogeneous Data**: Ensure on-chain KYC data fields are homogenous across users to prevent linking to real identities.
-- **Multiple Addresses**: Allow users to map multiple addresses to their KYC data to enhance anonymity.
-- **Secure Data Fetching**: Utilize Chainlink Functions for secure and reliable off-chain data fetching.
 
 ## Deployment addresses
 
